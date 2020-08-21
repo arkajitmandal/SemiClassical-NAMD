@@ -1,4 +1,5 @@
 import numpy as np
+import model
 # Initialization of the mapping Variables
 def initMapping(states, initState = 0,stype= "focused"):
     qF = np.zeros((states))
@@ -17,4 +18,8 @@ def initMapping(states, initState = 0,stype= "focused"):
        pB = np.array([ np.random.normal() for i in range(states)]) 
     return qF, qB, pF, pB 
 
-def propagateMap():
+def propagateMap(qF, qB, pF, pB, R, dt):
+    Vij = model.Hel(R) 
+    
+
+
