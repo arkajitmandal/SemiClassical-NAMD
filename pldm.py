@@ -20,6 +20,9 @@ def initMapping(states, initState = 0,stype= "focused"):
 
 def propagateMap(qF, qB, pF, pB, R, dt):
     Vij = model.Hel(R) 
-    
+    for i in range(len(Vij)):
+        fqB = 
+        qB[i] = qB[i] + 0.25 * np.sum(Vij[i,:] * pB[:]) * dt  #+ (1.0/8.0) * Vij[i,]
+
 
 
