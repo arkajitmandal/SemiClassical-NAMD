@@ -7,11 +7,11 @@ class parameters():
    NSteps = 10000
 
 def Hel():
-    vij = np.zeros((2,2))
-    vij[0,0] = 0.1
-    vij[1,0] = 0.01
-    vij[0,1] = 0.01
-    vij[1,1] = 0.0
-    return vij
+    v = np.zeros((2,2))
+    VMat[0,0] = 0.1
+    VMat[1,0] = 0.01
+    VMat[0,1] = 0.01
+    VMat[1,1] = 0.0
+    return VMat
 
 #def dHel():
