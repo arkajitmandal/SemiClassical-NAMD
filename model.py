@@ -3,7 +3,8 @@ from scipy.linalg import toeplitz
 
 class parameters():
    NSteps = 10**2 #int(2*10**6)
-   dt = 2*10**(-4)
+   dtI = 1
+   dtE = dtI/20
    NGrid = 100
 
 def HelTwoLevel():
@@ -37,24 +38,12 @@ def HelMarcusTheory(NGrid = 100):
     VMat[1,1] = 0.1 * (R-1)**2
     return VMat
 
-def getForce(VMat, qF, qB, pF, pB): # Take derivatives w.r.t. some value R along RxN coordinate
-    # R finds its way into VMat somehow: e.g., VMat[1,1] = (R-1)^2, VMat[2,2] = (R-2)^2 + 1    (???)
-    Hmap = np.zeros((NGrid)) # Mapping Ham
-    force = np.zeros((NGrid)) # Deriv. of Mapping Ham
-    dx = 1 # Arbitrary grid spacing
-    for i in range(NGrid):
-        for n in range(len(VMat)):
-            for m in range(len(VMat)):
-                Hmap[i] += 0.5 * ( 0.5 * VMat[n,m,i] * ( qF[n] * qF[m] + pF[n] * pF[m] ) + 0.5 * VMat[n,m,i] * ( qB[n] * qB[m] + pB[n] * pB[m] ) )
-    # Derivative Operator (gradient) in 1D w.r.t. "R"
-    # dfdR(i) = [ f(i+1) - f(i-1) ] / (2*dx)
-    for i in range(len(NGrid)):
-        if (i == 0):
-            force[i] = ( Hmap[i+1] - HMap[i] ) / dx
-        if (i == NGrid):
-            force[i] = ( Hmap[i] - HMap[i-1] ) / dx
-        else:
-            force[i] = ( Hmap[i+1] - HMap[i-1] ) / (2*dx)
-    return force
-
-
+def initR():
+    R0 = -9.0
+    P0 = 30
+    alpha = 1.0
+    sigR = 1.0/np.sqrt(2.0*alpha)
+    sigP = np.sqrt(alpha/2.0)
+    R = np.random.normal()*sigR + R0
+    P = np.random.normal()*sigP + P0
+    return R, P

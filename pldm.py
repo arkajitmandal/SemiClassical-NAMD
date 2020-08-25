@@ -1,7 +1,8 @@
 import numpy as np
 import model
 
-dt = model.parameters.dt
+dtE = model.parameters.dtE
+dtI = model.parameters.dtI
 NSteps = model.parameters.NSteps
 NGrid = model.parameters.NGrid
 
@@ -47,30 +48,24 @@ def propagateMapVars(qF, qB, pF, pB, dt):
        pF[i] -= 0.5 * dt * np.sum(VMat[i,:] * qF[:])
     return qF, qB, pF, pB
 
-def propagateMapVarsMarcus(qF, qB, pF, pB, dt):
-    qFin, qBin, pFin, pBin = qF, qB, pF, pB # Store input position and momentum for verlet propogation
-    # Store initial array containing sums to use at second derivative step
-    VMatxqB =  np.array([np.sum(VMat[k,:] * qBin[:]) for k in range(NStates)])
-    VMatxqF =  np.array([np.sum(VMat[k,:] * qFin[:]) for k in range(NStates)])
-    for i in range(NStates): # Loop over q's and p's for initial update of positions
-       # Update momenta using input positions (first-order in dt)
-       pB[i] -= 0.5 * dt * np.sum(VMat[i,:] * qBin[:]) ## First Derivatives ##
-       pF[i] -= 0.5 * dt * np.sum(VMat[i,:] * qFin[:])
-       # Now update positions with input momenta (first-order in dt)
-       qB[i] += dt * np.sum(VMat[i,:] * pBin[:])
-       qF[i] += dt * np.sum(VMat[i,:] * pFin[:])
-       for k in range(NStates):
-           # Update positions to second order in dt
-           qB[i] -= (dt**2/2.0) * (VMat[i,k])* VMatxqB[k] ## Second Derivatives ##
-           qF[i] -= (dt**2/2.0) * (VMat[i,k])* VMatxqF[k]
-    
-    # Update momenta using output positions (first-order in dt)
-    for i in range(NStates): # Loop over q's and p's for final update of fictitious momentum
-       pB[i] -= 0.5 * dt * np.sum(VMat[i,:] * qB[:])
-       pF[i] -= 0.5 * dt * np.sum(VMat[i,:] * qF[:])
-    return qF, qB, pF, pB
+def Force(R, qF, qB, pF, pB):
+    dHel = model.dHel(R) # Nxnxn Matrix, N = Nuclear DOF, n = NStates
+    F = np.zeros((len(R)))
+    for i in range(len(qF)):
+        for j in range(len(qF)):
+            F += 0.25 * dHel * ( qF[i] * qF[j] + pF[i] * pF[j] + qB[i] * qB[j] + pB[i] * pB[j])
+    return F
 
-
+def VelVerF(R, P, qF, qB, pF, pB, dtI, dtE=dtI/20, M=1): # Ionic position, ionic velocity, etc.
+    v = P/M
+    F1 = Force(R, qF, qB, pF, pB)
+    R += v * dtI + 0.5 * F1 * dtI ** 2 / M
+    EStep = int(dtI/dtE)
+    for t in range(EStep):
+        qF, qB, pF, pB = propagateMapVars(qF, qB, pF, pB, dtE)
+    F2 = Force(R, qF, qB, pF, pB)
+    v += 0.5 * (F1 + F2) * dtI / M
+    return R, v*M, qF, qB, pF, pB
 
 def getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, step):
     print (step/NSteps * 100, "%")
@@ -88,16 +83,15 @@ def getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, step):
               if (i == j and i == NStates-1):
                 file03.write("\t" + str(np.sum(rho[i,i].real for i in range(len(rho)))) + "\n")
                 file01.write("\n")
-
-
     return rho
 
 
 ## Start Main Program
 
 #VMat = model.HelTwoLevel() # Get interaction Hamiltonian from model file
-VMat = model.HelEqualEnergyManifold(2) # NEW EXPERIMENT ~BMW
-VMat = model.HelMarcusTheory(NGrid) # Marcus theory -- Two Parabolas
+#VMat = model.HelEqualEnergyManifold(2) # NEW EXPERIMENT ~BMW
+#VMat = model.HelMarcusTheory(NGrid) # Marcus theory -- Two Parabolas
+R,P = initR()
 NStates = len(VMat) # This is the dimension of the interaction hamiltonian.
 initState = 0 # Choose (arbitrarily???) the initial state of the particle population. To see "relaxation" of particle population, should be high-energy state in VMat.
 qF, qB, pF, pB = initMapping(NStates,initState) # Call function to initialize fictitious oscillators according to focused ("Default") or according to gaussian random distribution
@@ -110,7 +104,8 @@ file03 = open("output_rho_diags.txt","w")
 for i in range(NSteps):
     if (i % 1000 == 0):
         rho_current = getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, i)
-    qF, qB, pF, pB = propagateMapVars(qF, qB, pF, pB, dt)
+    #qF, qB, pF, pB = propagateMapVars(qF, qB, pF, pB, dtE) # Old two-level system model
+    R, P, qF, qB, pF, pB = VelVerF(R, P, qF, qB, pF, pB, dtI, dtE, M)
 file01.close()
 #file02.close()
 
