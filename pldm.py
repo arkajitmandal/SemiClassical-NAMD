@@ -3,6 +3,7 @@ import model
 
 dt = model.parameters.dt
 NSteps = model.parameters.NSteps
+NGrid = model.parameters.NGrid
 
 # Initialization of the mapping Variables
 def initMapping(Nstates, initState = 0, stype = "focused"):
@@ -23,24 +24,53 @@ def initMapping(Nstates, initState = 0, stype = "focused"):
        pB = np.array([ np.random.normal() for i in range(Nstates)]) 
     return qF, qB, pF, pB 
 
-def propagateMapVars(qF, qB, pF, pB, dt): # Note that I removed "R" from this list temporarily
+def propagateMapVars(qF, qB, pF, pB, dt):
     qFin, qBin, pFin, pBin = qF, qB, pF, pB # Store input position and momentum for verlet propogation
     # Store initial array containing sums to use at second derivative step
     VMatxqB =  np.array([np.sum(VMat[k,:] * qBin[:]) for k in range(NStates)])
     VMatxqF =  np.array([np.sum(VMat[k,:] * qFin[:]) for k in range(NStates)])
     for i in range(NStates): # Loop over q's and p's for initial update of positions
+       # Update momenta using input positions (first-order in dt)
        pB[i] -= 0.5 * dt * np.sum(VMat[i,:] * qBin[:]) ## First Derivatives ##
        pF[i] -= 0.5 * dt * np.sum(VMat[i,:] * qFin[:])
+       # Now update positions with input momenta (first-order in dt)
        qB[i] += dt * np.sum(VMat[i,:] * pBin[:])
        qF[i] += dt * np.sum(VMat[i,:] * pFin[:])
        for k in range(NStates):
+           # Update positions to second order in dt
            qB[i] -= (dt**2/2.0) * (VMat[i,k])* VMatxqB[k] ## Second Derivatives ##
            qF[i] -= (dt**2/2.0) * (VMat[i,k])* VMatxqF[k]
-
+    
+    # Update momenta using output positions (first-order in dt)
     for i in range(NStates): # Loop over q's and p's for final update of fictitious momentum
        pB[i] -= 0.5 * dt * np.sum(VMat[i,:] * qB[:])
        pF[i] -= 0.5 * dt * np.sum(VMat[i,:] * qF[:])
     return qF, qB, pF, pB
+
+def propagateMapVarsMarcus(qF, qB, pF, pB, dt):
+    qFin, qBin, pFin, pBin = qF, qB, pF, pB # Store input position and momentum for verlet propogation
+    # Store initial array containing sums to use at second derivative step
+    VMatxqB =  np.array([np.sum(VMat[k,:] * qBin[:]) for k in range(NStates)])
+    VMatxqF =  np.array([np.sum(VMat[k,:] * qFin[:]) for k in range(NStates)])
+    for i in range(NStates): # Loop over q's and p's for initial update of positions
+       # Update momenta using input positions (first-order in dt)
+       pB[i] -= 0.5 * dt * np.sum(VMat[i,:] * qBin[:]) ## First Derivatives ##
+       pF[i] -= 0.5 * dt * np.sum(VMat[i,:] * qFin[:])
+       # Now update positions with input momenta (first-order in dt)
+       qB[i] += dt * np.sum(VMat[i,:] * pBin[:])
+       qF[i] += dt * np.sum(VMat[i,:] * pFin[:])
+       for k in range(NStates):
+           # Update positions to second order in dt
+           qB[i] -= (dt**2/2.0) * (VMat[i,k])* VMatxqB[k] ## Second Derivatives ##
+           qF[i] -= (dt**2/2.0) * (VMat[i,k])* VMatxqF[k]
+    
+    # Update momenta using output positions (first-order in dt)
+    for i in range(NStates): # Loop over q's and p's for final update of fictitious momentum
+       pB[i] -= 0.5 * dt * np.sum(VMat[i,:] * qB[:])
+       pF[i] -= 0.5 * dt * np.sum(VMat[i,:] * qF[:])
+    return qF, qB, pF, pB
+
+
 
 def getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, step):
     print (step/NSteps * 100, "%")
@@ -66,7 +96,8 @@ def getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, step):
 ## Start Main Program
 
 #VMat = model.HelTwoLevel() # Get interaction Hamiltonian from model file
-VMat = model.HelEqualManifold() # NEW EXPERIMENT ~BMW
+VMat = model.HelEqualEnergyManifold(2) # NEW EXPERIMENT ~BMW
+VMat = model.HelMarcusTheory(NGrid) # Marcus theory -- Two Parabolas
 NStates = len(VMat) # This is the dimension of the interaction hamiltonian.
 initState = 0 # Choose (arbitrarily???) the initial state of the particle population. To see "relaxation" of particle population, should be high-energy state in VMat.
 qF, qB, pF, pB = initMapping(NStates,initState) # Call function to initialize fictitious oscillators according to focused ("Default") or according to gaussian random distribution
@@ -82,6 +113,10 @@ for i in range(NSteps):
     qF, qB, pF, pB = propagateMapVars(qF, qB, pF, pB, dt)
 file01.close()
 #file02.close()
+
+Hmap = model.getForce(VMat, qF, qB, pF, pB)
+print (Hmap)
+
 
 ## OLD CODE: ##   
 #file01.write( str(i) + "\t" + "\t".join(rho_current.flatten().real.astype("str")) + "\t" + str(np.sum(rho_current[i,i].real for i in range(len(rho_current)))) + "\n")
