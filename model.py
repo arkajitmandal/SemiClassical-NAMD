@@ -2,41 +2,39 @@ import numpy as np
 from scipy.linalg import toeplitz
 
 class parameters():
-   NSteps = 10**2 #int(2*10**6)
+   NSteps = 10**3 #int(2*10**6)
+   NTraj = 10**2
    dtI = 1
    dtE = dtI/20
    NGrid = 100
+   NStates = 2
+   M = 2000
 
-def HelTwoLevel():
+def Hel(R):
+    A = 0.1
+    B = 0.28
+    C = 0.015
+    D = 0.06
+    E0 = 0.05
     VMat = np.zeros((2,2))
-    VMat[0,0] = 0.1 # Hartrees (27.2114 eV/Hartree)
-    VMat[1,0] = 0.01
-    VMat[0,1] = 0.01
-    VMat[1,1] = 0.0
+    VMat[0,0] = 0.0
+    VMat[1,0] = C * np.exp(-D * R**2)
+    VMat[0,1] = VMat[1,0]
+    VMat[1,1] = -A * np.exp(-B * R**2) + E0
     return VMat
 
-def HelEqualEnergyManifold(N = 2):
-    zeros = np.zeros((N-2))
-    matrixvec = [0,0.01]
-    matrixvec.extend(zeros)
-    print ([0,0.01].extend(zeros))
-    VMat = toeplitz(matrixvec,matrixvec)
-    for n in range(N):
-        for m in range(N):
-            if (m == n):
-                VMat[n,m] += 0.2 * (1 - n/N) - 0.1
-    print (VMat)
-    return VMat
-
-def HelMarcusTheory(NGrid = 100):
-    R = np.arange(NGrid)
-    print (R**2)
-    VMat = np.zeros((2,2,NGrid))
-    VMat[0,0] = 0.1 * R**2
-    VMat[1,0] = 0.01
-    VMat[0,1] = 0.01
-    VMat[1,1] = 0.1 * (R-1)**2
-    return VMat
+def dHel(R):
+    A = 0.1
+    B = 0.28
+    C = 0.015
+    D = 0.06
+    E0 = 0.05
+    dVMat = np.zeros((2,2,1))
+    dVMat[0,0,0] = 0.0
+    dVMat[1,0,0] = C * np.exp(-D * R**2) * (-2 * D * R)
+    dVMat[0,1,0] = dVMat[1,0]
+    dVMat[1,1,0] = -A * np.exp(-B * R**2) * (-2 * B * R)
+    return dVMat
 
 def initR():
     R0 = -9.0
@@ -46,4 +44,4 @@ def initR():
     sigP = np.sqrt(alpha/2.0)
     R = np.random.normal()*sigR + R0
     P = np.random.normal()*sigP + P0
-    return R, P
+    return np.array([R]), np.array([P])

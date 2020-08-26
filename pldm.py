@@ -4,7 +4,10 @@ import model
 dtE = model.parameters.dtE
 dtI = model.parameters.dtI
 NSteps = model.parameters.NSteps
+NTraj = model.parameters.NTraj
 NGrid = model.parameters.NGrid
+NStates = model.parameters.NStates
+M = model.parameters.M
 
 # Initialization of the mapping Variables
 def initMapping(Nstates, initState = 0, stype = "focused"):
@@ -25,7 +28,8 @@ def initMapping(Nstates, initState = 0, stype = "focused"):
        pB = np.array([ np.random.normal() for i in range(Nstates)]) 
     return qF, qB, pF, pB 
 
-def propagateMapVars(qF, qB, pF, pB, dt):
+def propagateMapVars(qF, qB, pF, pB, dt, R):
+    VMat = model.Hel(R)
     qFin, qBin, pFin, pBin = qF, qB, pF, pB # Store input position and momentum for verlet propogation
     # Store initial array containing sums to use at second derivative step
     VMatxqB =  np.array([np.sum(VMat[k,:] * qBin[:]) for k in range(NStates)])
@@ -53,7 +57,7 @@ def Force(R, qF, qB, pF, pB):
     F = np.zeros((len(R)))
     for i in range(len(qF)):
         for j in range(len(qF)):
-            F += 0.25 * dHel * ( qF[i] * qF[j] + pF[i] * pF[j] + qB[i] * qB[j] + pB[i] * pB[j])
+            F -= 0.25 * dHel[i,j,:] * ( qF[i] * qF[j] + pF[i] * pF[j] + qB[i] * qB[j] + pB[i] * pB[j])
     return F
 
 def VelVerF(R, P, qF, qB, pF, pB, dtI, dtE=dtI/20, M=1): # Ionic position, ionic velocity, etc.
@@ -62,19 +66,21 @@ def VelVerF(R, P, qF, qB, pF, pB, dtI, dtE=dtI/20, M=1): # Ionic position, ionic
     R += v * dtI + 0.5 * F1 * dtI ** 2 / M
     EStep = int(dtI/dtE)
     for t in range(EStep):
-        qF, qB, pF, pB = propagateMapVars(qF, qB, pF, pB, dtE)
+        qF, qB, pF, pB = propagateMapVars(qF, qB, pF, pB, dtE, R)
     F2 = Force(R, qF, qB, pF, pB)
     v += 0.5 * (F1 + F2) * dtI / M
     return R, v*M, qF, qB, pF, pB
 
 def getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, step):
-    print (step/NSteps * 100, "%")
+    #print (step/NSteps * 100, "%")
     rho = np.zeros(( len(qF), len(qF) ), dtype=complex) # Define density matrix
     rho0 = (qF0 - 1j*pF0) * (qB0 + 1j*pB0)
-    file01.write(str(step))
-    file03.write(str(step))
+    #file01.write(str(step))
+    #file03.write(str(step))
     for i in range(len(qF)):
        for j in range(len(qF)):
+          rho[i,j] = 0.25 * (qF[i] + 1j*pF[i]) * (qB[j] - 1j*pB[j]) * rho0
+          """ 
           if (j >= i and i != j):
               rho[i,j] = 0.25 * (qF[i] + 1j*pF[i]) * (qB[j] - 1j*pB[j]) * rho0
               file01.write("\t" + str(rho[i,j].real))
@@ -83,6 +89,7 @@ def getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, step):
               if (i == j and i == NStates-1):
                 file03.write("\t" + str(np.sum(rho[i,i].real for i in range(len(rho)))) + "\n")
                 file01.write("\n")
+          """
     return rho
 
 
@@ -91,26 +98,36 @@ def getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, step):
 #VMat = model.HelTwoLevel() # Get interaction Hamiltonian from model file
 #VMat = model.HelEqualEnergyManifold(2) # NEW EXPERIMENT ~BMW
 #VMat = model.HelMarcusTheory(NGrid) # Marcus theory -- Two Parabolas
-R,P = initR()
-NStates = len(VMat) # This is the dimension of the interaction hamiltonian.
+
 initState = 0 # Choose (arbitrarily???) the initial state of the particle population. To see "relaxation" of particle population, should be high-energy state in VMat.
-qF, qB, pF, pB = initMapping(NStates,initState) # Call function to initialize fictitious oscillators according to focused ("Default") or according to gaussian random distribution
-qF0, qB0, pF0, pB0 = qF[initState], qB[initState], pF[initState], pB[initState] # Set initial values of fictitious oscillator variables for future use
 
 file01 = open("output_rho.txt","w") # Density natrix: Step, 11, 12, 13, 14, 22, 23, 24, 33, 34, 44, or similar for upper triangle of NxN matrix, SUM_OF_DIAGS
 file03 = open("output_rho_diags.txt","w")
 #file02 = open("output_map.txt","w") # Fictitious Oscillator Motion (Use for sanity check): Step, qF[0], PF
 
-for i in range(NSteps):
-    if (i % 1000 == 0):
-        rho_current = getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, i)
-    #qF, qB, pF, pB = propagateMapVars(qF, qB, pF, pB, dtE) # Old two-level system model
-    R, P, qF, qB, pF, pB = VelVerF(R, P, qF, qB, pF, pB, dtI, dtE, M)
-file01.close()
-#file02.close()
+rho_ensemble = np.zeros((NStates,NStates,NSteps), dtype=complex)
+for itraj in range(NTraj): # Ensemble
+    R,P = model.initR()
+    qF, qB, pF, pB = initMapping(NStates,initState) # Call function to initialize fictitious oscillators according to focused ("Default") or according to gaussian random distribution
+    qF0, qB0, pF0, pB0 = qF[initState], qB[initState], pF[initState], pB[initState] # Set initial values of fictitious oscillator variables for future use
+    print (itraj)
+    for i in range(NSteps): # One trajectory
+        if (i % 1 == 0):
+            rho_current = getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, i)
+            rho_ensemble[:,:,i] += rho_current
+        R, P, qF, qB, pF, pB = VelVerF(R, P, qF, qB, pF, pB, dtI, dtE, M)
 
-Hmap = model.getForce(VMat, qF, qB, pF, pB)
-print (Hmap)
+    #file02.close()
+
+file05 = open("output_new_rho.txt","w")
+for t in range(NSteps):
+    file05.write(str(t) + "\t")
+    for i in range(NStates):
+        file05.write(str(rho_ensemble[i,i,t].real / NTraj) + "\t")
+    file05.write("\n")
+file05.close()
+
+
 
 
 ## OLD CODE: ##   
