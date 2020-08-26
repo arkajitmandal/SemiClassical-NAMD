@@ -1,17 +1,47 @@
-#def param():
-
 import numpy as np
+from scipy.linalg import toeplitz
 
 class parameters():
-   dt = 0.01
-   NSteps = 10000
+   NSteps = 10**3 #int(2*10**6)
+   NTraj = 10**2
+   dtI = 1
+   dtE = dtI/20
+   NGrid = 100
+   NStates = 2
+   M = 2000
 
-def Hel():
-    vij = np.zeros((2,2))
-    vij[0,0] = 0.1
-    vij[1,0] = 0.01
-    vij[0,1] = 0.01
-    vij[1,1] = 0.0
-    return vij
+def Hel(R):
+    A = 0.1
+    B = 0.28
+    C = 0.015
+    D = 0.06
+    E0 = 0.05
+    VMat = np.zeros((2,2))
+    VMat[0,0] = 0.0
+    VMat[1,0] = C * np.exp(-D * R**2)
+    VMat[0,1] = VMat[1,0]
+    VMat[1,1] = -A * np.exp(-B * R**2) + E0
+    return VMat
 
-#def dHel():
+def dHel(R):
+    A = 0.1
+    B = 0.28
+    C = 0.015
+    D = 0.06
+    E0 = 0.05
+    dVMat = np.zeros((2,2,1))
+    dVMat[0,0,0] = 0.0
+    dVMat[1,0,0] = C * np.exp(-D * R**2) * (-2 * D * R)
+    dVMat[0,1,0] = dVMat[1,0]
+    dVMat[1,1,0] = -A * np.exp(-B * R**2) * (-2 * B * R)
+    return dVMat
+
+def initR():
+    R0 = -9.0
+    P0 = 30
+    alpha = 1.0
+    sigR = 1.0/np.sqrt(2.0*alpha)
+    sigP = np.sqrt(alpha/2.0)
+    R = np.random.normal()*sigR + R0
+    P = np.random.normal()*sigP + P0
+    return np.array([R]), np.array([P])
