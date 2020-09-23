@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.linalg import toeplitz
 
 class parameters():
    NSteps = 10**3 #int(2*10**6)
@@ -9,6 +8,7 @@ class parameters():
    NGrid = 100
    NStates = 2
    M = 2000
+   initState = 0
 
 def Hel(R):
     A = 0.1

@@ -74,48 +74,38 @@ def getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, step):
     return rho
 
 
-## Parameters
+def runTraj(parameters = model.parameters):
+    ## Parameters
+    dtE = parameters.dtE
+    dtI = parameters.dtI
+    NSteps = parameters.NSteps
+    NTraj = parameters.NTraj
+    NGrid = parameters.NGrid
+    NStates = parameters.NStates
+    M = parameters.M #mass
+    initState = parameters.initState # intial state
+    Ntraj = parameters.NTraj
+    rho_ensemble = np.zeros((NStates,NStates,NSteps), dtype=complex)
+    for itraj in range(NTraj): # Ensemble
+        R,P = model.initR()
+        qF, qB, pF, pB = initMapping(NStates,initState) # Call function to initialize fictitious oscillators according to focused ("Default") or according to gaussian random distribution
+        qF0, qB0, pF0, pB0 = qF[initState], qB[initState], pF[initState], pB[initState] # Set initial values of fictitious oscillator variables for future use
+        print (itraj)
+        for i in range(NSteps): # One trajectory
+            if (i % 1 == 0):
+                rho_current = getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, i)
+                rho_ensemble[:,:,i] += rho_current
+            R, P, qF, qB, pF, pB = VelVerF(R, P, qF, qB, pF, pB, dtI, dtE, M)
+    return rho_ensemble
 
-dtE = model.parameters.dtE
-dtI = model.parameters.dtI
-NSteps = model.parameters.NSteps
-NTraj = model.parameters.NTraj
-NGrid = model.parameters.NGrid
-NStates = model.parameters.NStates
-M = model.parameters.M #mass
-initState = model.parameters.initState # intial state
-
-
-
-rho_ensemble = np.zeros((NStates,NStates,NSteps), dtype=complex)
-for itraj in range(NTraj): # Ensemble
-    R,P = model.initR()
-    qF, qB, pF, pB = initMapping(NStates,initState) # Call function to initialize fictitious oscillators according to focused ("Default") or according to gaussian random distribution
-    qF0, qB0, pF0, pB0 = qF[initState], qB[initState], pF[initState], pB[initState] # Set initial values of fictitious oscillator variables for future use
-    print (itraj)
-    for i in range(NSteps): # One trajectory
-        if (i % 1 == 0):
-            rho_current = getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, i)
-            rho_ensemble[:,:,i] += rho_current
-        R, P, qF, qB, pF, pB = VelVerF(R, P, qF, qB, pF, pB, dtI, dtE, M)
-
-    #file02.close()
-
-PiiFile = open("Pii.txt","w") 
-for t in range(NSteps):
-    PiiFile.write(str(t) + "\t")
-    for i in range(NStates):
-        PiiFile.write(str(rho_ensemble[i,i,t].real / NTraj) + "\t")
-    PiiFile.write("\n")
-PiiFile.close()
-
-
-
-
-## OLD CODE: ##   
-#file01.write( str(i) + "\t" + "\t".join(rho_current.flatten().real.astype("str")) + "\t" + str(np.sum(rho_current[i,i].real for i in range(len(rho_current)))) + "\n")
-#file02.write( str(i) + "\t" + str(qF[0]) + "\t" + str(pF[0]) + + "\t" + str(qB[0]) + "\t" + str(pB[0]) + "\n")
-
-
-
+if __name__ == "__main__": 
+    rho_ensemble = runTraj(model.parameters)
+    
+    PiiFile = open("Pii.txt","w") 
+    for t in range(NSteps):
+        PiiFile.write(str(t) + "\t")
+        for i in range(NStates):
+            PiiFile.write(str(rho_ensemble[i,i,t].real / NTraj) + "\t")
+        PiiFile.write("\n")
+    PiiFile.close()
 
