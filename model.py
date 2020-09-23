@@ -2,10 +2,9 @@ import numpy as np
 
 class parameters():
    NSteps = 10**3 #int(2*10**6)
-   NTraj = 10
+   NTraj = 25
    dtN = 1
    dtE = dtN/20
-   NGrid = 100
    NStates = 2
    M = 2000
    initState = 0

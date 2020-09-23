@@ -1,5 +1,6 @@
 import numpy as np
 import model
+from model import Hel, dHel, initR
 
 
 # Initialization of the mapping Variables
@@ -23,7 +24,7 @@ def initMapping(Nstates, initState = 0, stype = "focused"):
 
 def propagateMapVars(qF, qB, pF, pB, dt, R):
     NStates = len(qF)
-    VMat = model.Hel(R)
+    VMat = Hel(R)
     qFin, qBin, pFin, pBin = qF, qB, pF, pB # Store input position and momentum for verlet propogation
     # Store initial array containing sums to use at second derivative step
     VMatxqB =  np.array([np.sum(VMat[k,:] * qBin[:]) for k in range(NStates)])
@@ -47,23 +48,23 @@ def propagateMapVars(qF, qB, pF, pB, dt, R):
     return qF, qB, pF, pB
 
 def Force(R, qF, qB, pF, pB):
-    dHel = model.dHel(R) # Nxnxn Matrix, N = Nuclear DOF, n = NStates
+    dH = dHel(R) # Nxnxn Matrix, N = Nuclear DOF, n = NStates
     F = np.zeros((len(R)))
     for i in range(len(qF)):
         for j in range(len(qF)):
-            F -= 0.25 * dHel[i,j,:] * ( qF[i] * qF[j] + pF[i] * pF[j] + qB[i] * qB[j] + pB[i] * pB[j])
+            F -= 0.25 * dH[i,j,:] * ( qF[i] * qF[j] + pF[i] * pF[j] + qB[i] * qB[j] + pB[i] * pB[j])
     return F
 
-def VelVerF(R, P, qF, qB, pF, pB, dtI, dtE, M=1): # Ionic position, ionic velocity, etc.
+def VelVerF(R, P, qF, qB, pF, pB, dtI, dtE, F1,  M=1): # Ionic position, ionic velocity, etc.
     v = P/M
-    F1 = Force(R, qF, qB, pF, pB)
+    #F1 = Force(R, qF, qB, pF, pB)
     R += v * dtI + 0.5 * F1 * dtI ** 2 / M
     EStep = int(dtI/dtE)
     for t in range(EStep):
         qF, qB, pF, pB = propagateMapVars(qF, qB, pF, pB, dtE, R)
     F2 = Force(R, qF, qB, pF, pB)
     v += 0.5 * (F1 + F2) * dtI / M
-    return R, v*M, qF, qB, pF, pB
+    return R, v*M, qF, qB, pF, pB, F2
 
 def getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, step):
     #print (step/NSteps * 100, "%")
@@ -81,7 +82,6 @@ def runTraj(parameters = model.parameters):
     dtN = parameters.dtN
     NSteps = parameters.NSteps
     NTraj = parameters.NTraj
-    NGrid = parameters.NGrid
     NStates = parameters.NStates
     M = parameters.M #mass
     initState = parameters.initState # intial state
@@ -91,7 +91,7 @@ def runTraj(parameters = model.parameters):
 
     rho_ensemble = np.zeros((NStates,NStates,NSteps), dtype=complex)
     for itraj in range(NTraj): # Ensemble
-        R,P = model.initR()
+        R,P = initR()
 
         # Call function to initialize fictitious oscillators 
         # according to focused ("Default") or according 
@@ -100,15 +100,14 @@ def runTraj(parameters = model.parameters):
 
         # Set initial values of fictitious oscillator variables for future use
         qF0, qB0, pF0, pB0 = qF[initState], qB[initState], pF[initState], pB[initState] 
-
-        print (itraj)
+        F1 = Force(R, qF, qB, pF, pB)
 
         for i in range(NSteps): # One trajectory
 
             if (i % 1 == 0):
                 rho_current = getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, i)
                 rho_ensemble[:,:,i] += rho_current
-            R, P, qF, qB, pF, pB = VelVerF(R, P, qF, qB, pF, pB, dtN, dtE, M)
+            R, P, qF, qB, pF, pB, F1 = VelVerF(R, P, qF, qB, pF, pB, dtN, dtE, F1, M)
 
     return rho_ensemble
 
