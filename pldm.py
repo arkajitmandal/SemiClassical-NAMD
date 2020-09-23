@@ -1,13 +1,6 @@
 import numpy as np
 import model
 
-dtE = model.parameters.dtE
-dtI = model.parameters.dtI
-NSteps = model.parameters.NSteps
-NTraj = model.parameters.NTraj
-NGrid = model.parameters.NGrid
-NStates = model.parameters.NStates
-M = model.parameters.M
 
 # Initialization of the mapping Variables
 def initMapping(Nstates, initState = 0, stype = "focused"):
@@ -75,35 +68,24 @@ def getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, step):
     #print (step/NSteps * 100, "%")
     rho = np.zeros(( len(qF), len(qF) ), dtype=complex) # Define density matrix
     rho0 = (qF0 - 1j*pF0) * (qB0 + 1j*pB0)
-    #file01.write(str(step))
-    #file03.write(str(step))
     for i in range(len(qF)):
        for j in range(len(qF)):
           rho[i,j] = 0.25 * (qF[i] + 1j*pF[i]) * (qB[j] - 1j*pB[j]) * rho0
-          """ 
-          if (j >= i and i != j):
-              rho[i,j] = 0.25 * (qF[i] + 1j*pF[i]) * (qB[j] - 1j*pB[j]) * rho0
-              file01.write("\t" + str(rho[i,j].real))
-              if (i == j):
-                file03.write("\t" + str(rho[i,j].real))
-              if (i == j and i == NStates-1):
-                file03.write("\t" + str(np.sum(rho[i,i].real for i in range(len(rho)))) + "\n")
-                file01.write("\n")
-          """
     return rho
 
 
-## Start Main Program
+## Parameters
 
-#VMat = model.HelTwoLevel() # Get interaction Hamiltonian from model file
-#VMat = model.HelEqualEnergyManifold(2) # NEW EXPERIMENT ~BMW
-#VMat = model.HelMarcusTheory(NGrid) # Marcus theory -- Two Parabolas
+dtE = model.parameters.dtE
+dtI = model.parameters.dtI
+NSteps = model.parameters.NSteps
+NTraj = model.parameters.NTraj
+NGrid = model.parameters.NGrid
+NStates = model.parameters.NStates
+M = model.parameters.M #mass
+initState = model.parameters.initState # intial state
 
-initState = 0 # Choose (arbitrarily???) the initial state of the particle population. To see "relaxation" of particle population, should be high-energy state in VMat.
 
-file01 = open("output_rho.txt","w") # Density natrix: Step, 11, 12, 13, 14, 22, 23, 24, 33, 34, 44, or similar for upper triangle of NxN matrix, SUM_OF_DIAGS
-file03 = open("output_rho_diags.txt","w")
-#file02 = open("output_map.txt","w") # Fictitious Oscillator Motion (Use for sanity check): Step, qF[0], PF
 
 rho_ensemble = np.zeros((NStates,NStates,NSteps), dtype=complex)
 for itraj in range(NTraj): # Ensemble
@@ -119,13 +101,13 @@ for itraj in range(NTraj): # Ensemble
 
     #file02.close()
 
-file05 = open("output_new_rho.txt","w")
+PiiFile = open("Pii.txt","w") 
 for t in range(NSteps):
-    file05.write(str(t) + "\t")
+    PiiFile.write(str(t) + "\t")
     for i in range(NStates):
-        file05.write(str(rho_ensemble[i,i,t].real / NTraj) + "\t")
-    file05.write("\n")
-file05.close()
+        PiiFile.write(str(rho_ensemble[i,i,t].real / NTraj) + "\t")
+    PiiFile.write("\n")
+PiiFile.close()
 
 
 
