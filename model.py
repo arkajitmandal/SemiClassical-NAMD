@@ -2,13 +2,14 @@ import numpy as np
 
 class parameters():
    NSteps = 10**3 #int(2*10**6)
-   NTraj = 10**2
-   dtI = 1
-   dtE = dtI/20
+   NTraj = 10
+   dtN = 1
+   dtE = dtN/20
    NGrid = 100
    NStates = 2
    M = 2000
    initState = 0
+   stype = "focused"
 
 def Hel(R):
     A = 0.1

@@ -22,6 +22,7 @@ def initMapping(Nstates, initState = 0, stype = "focused"):
     return qF, qB, pF, pB 
 
 def propagateMapVars(qF, qB, pF, pB, dt, R):
+    NStates = len(qF)
     VMat = model.Hel(R)
     qFin, qBin, pFin, pBin = qF, qB, pF, pB # Store input position and momentum for verlet propogation
     # Store initial array containing sums to use at second derivative step
@@ -53,7 +54,7 @@ def Force(R, qF, qB, pF, pB):
             F -= 0.25 * dHel[i,j,:] * ( qF[i] * qF[j] + pF[i] * pF[j] + qB[i] * qB[j] + pB[i] * pB[j])
     return F
 
-def VelVerF(R, P, qF, qB, pF, pB, dtI, dtE=dtI/20, M=1): # Ionic position, ionic velocity, etc.
+def VelVerF(R, P, qF, qB, pF, pB, dtI, dtE, M=1): # Ionic position, ionic velocity, etc.
     v = P/M
     F1 = Force(R, qF, qB, pF, pB)
     R += v * dtI + 0.5 * F1 * dtI ** 2 / M
@@ -75,9 +76,9 @@ def getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, step):
 
 
 def runTraj(parameters = model.parameters):
-    ## Parameters
+    ## Parameters -------------
     dtE = parameters.dtE
-    dtI = parameters.dtI
+    dtN = parameters.dtN
     NSteps = parameters.NSteps
     NTraj = parameters.NTraj
     NGrid = parameters.NGrid
@@ -85,22 +86,37 @@ def runTraj(parameters = model.parameters):
     M = parameters.M #mass
     initState = parameters.initState # intial state
     Ntraj = parameters.NTraj
+    stype = parameters.stype
+    #---------------------------
+
     rho_ensemble = np.zeros((NStates,NStates,NSteps), dtype=complex)
     for itraj in range(NTraj): # Ensemble
         R,P = model.initR()
-        qF, qB, pF, pB = initMapping(NStates,initState) # Call function to initialize fictitious oscillators according to focused ("Default") or according to gaussian random distribution
-        qF0, qB0, pF0, pB0 = qF[initState], qB[initState], pF[initState], pB[initState] # Set initial values of fictitious oscillator variables for future use
+
+        # Call function to initialize fictitious oscillators 
+        # according to focused ("Default") or according 
+        # to gaussian random distribution
+        qF, qB, pF, pB = initMapping(NStates, initState, stype) 
+
+        # Set initial values of fictitious oscillator variables for future use
+        qF0, qB0, pF0, pB0 = qF[initState], qB[initState], pF[initState], pB[initState] 
+
         print (itraj)
+
         for i in range(NSteps): # One trajectory
+
             if (i % 1 == 0):
                 rho_current = getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, i)
                 rho_ensemble[:,:,i] += rho_current
-            R, P, qF, qB, pF, pB = VelVerF(R, P, qF, qB, pF, pB, dtI, dtE, M)
+            R, P, qF, qB, pF, pB = VelVerF(R, P, qF, qB, pF, pB, dtN, dtE, M)
+
     return rho_ensemble
 
 if __name__ == "__main__": 
     rho_ensemble = runTraj(model.parameters)
-    
+    NSteps = model.parameters.NSteps
+    NTraj = model.parameters.NTraj
+    NStates = model.parameters.NStates
     PiiFile = open("Pii.txt","w") 
     for t in range(NSteps):
         PiiFile.write(str(t) + "\t")
