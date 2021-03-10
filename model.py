@@ -28,7 +28,6 @@ def dHel(R):
     B = 0.28
     C = 0.015
     D = 0.06
-    E0 = 0.05
     dVMat = np.zeros((2,2,1))
     dVMat[0,0,0] = 0.0
     dVMat[1,0,0] = C * np.exp(-D * R**2) * (-2 * D * R)
