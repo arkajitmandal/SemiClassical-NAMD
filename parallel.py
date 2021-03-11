@@ -54,14 +54,14 @@ with Pool(procs) as p:
 #------------------- Gather --------------------------------------------
 rho_sum = np.zeros(rho_ensemble[0].shape, dtype = rho_ensemble[0].dtype)
 for i in range(procs):
-    for t in range(NSteps):
+    for t in range(rho_ensemble[0].shape[-1]):
         rho_sum[:,:,t] += rho_ensemble[i][:,:,t]
 
 
 PiiFile = open("Pii.txt","w") 
 NTraj = model.parameters().NTraj
-for t in range(NSteps):
-    PiiFile.write(str(t) + "\t")
+for t in range(rho_ensemble[0].shape[-1]):
+    PiiFile.write(f"{t * model.parameters.nskip} \t")
     for i in range(NStates):
         PiiFile.write(str(rho_sum[i,i,t].real / (  procs * NTraj ) ) + "\t")
     PiiFile.write("\n")

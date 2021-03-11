@@ -2,7 +2,6 @@ import numpy as np
 import model
 from model import Hel, dHel, initR
 
-
 # Initialization of the mapping Variables
 def initMapping(Nstates, initState = 0, stype = "focused"):
     #global qF, qB, pF, pB, qF0, qB0, pF0, pB0
@@ -66,11 +65,8 @@ def VelVerF(R, P, qF, qB, pF, pB, dtI, dtE, F1,  M=1): # Ionic position, ionic v
     v += 0.5 * (F1 + F2) * dtI / M
     return R, v*M, qF, qB, pF, pB, F2
 
-def getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, step):
-    rho0 = 0.25 * (qF0 - 1j*pF0) * (qB0 + 1j*pB0)
-    rho = np.outer(qF + 1j*pF, qB-1j*pB) * rho0
-    return rho
-
+def pop(qF, qB, pF, pB, rho0):
+    return np.outer(qF + 1j*pF, qB-1j*pB) * rho0
 
 def runTraj(parameters = model.parameters):
     #------- Seed --------------------
@@ -87,11 +83,11 @@ def runTraj(parameters = model.parameters):
     NStates = parameters.NStates
     M = parameters.M #mass
     initState = parameters.initState # intial state
-    Ntraj = parameters.NTraj
     stype = parameters.stype
+    nskip = parameters.nskip
     #---------------------------
 
-    rho_ensemble = np.zeros((NStates,NStates,NSteps), dtype=complex)
+    rho_ensemble = np.zeros((NStates,NStates,NSteps//nskip), dtype=complex)
     for itraj in range(NTraj): # Ensemble
         R,P = initR()
 
@@ -102,13 +98,16 @@ def runTraj(parameters = model.parameters):
 
         # Set initial values of fictitious oscillator variables for future use
         qF0, qB0, pF0, pB0 = qF[initState], qB[initState], pF[initState], pB[initState] 
+        rho0 = 0.25 * (qF0 - 1j*pF0) * (qB0 + 1j*pB0)
+        #----- Initial Force --------
         F1 = Force(R, qF, qB, pF, pB)
-
+        iskip = 0
         for i in range(NSteps): # One trajectory
-
-            if (i % 1 == 0):
-                rho_current = getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, i)
-                rho_ensemble[:,:,i] += rho_current
+            #------- ESTIMATORS-------------------------------------
+            if (i % nskip == 0):
+                rho_ensemble[:,:,iskip] += pop(qF, qB, pF, pB, rho0)
+                iskip += 1
+            #-------------------------------------------------------
             R, P, qF, qB, pF, pB, F1 = VelVerF(R, P, qF, qB, pF, pB, dtN, dtE, F1, M)
 
     return rho_ensemble
@@ -118,9 +117,10 @@ if __name__ == "__main__":
     NSteps = model.parameters.NSteps
     NTraj = model.parameters.NTraj
     NStates = model.parameters.NStates
+
     PiiFile = open("Pii.txt","w") 
     for t in range(NSteps):
-        PiiFile.write(str(t) + "\t")
+        PiiFile.write(f"{t * model.parameters.nskip} \t")
         for i in range(NStates):
             PiiFile.write(str(rho_ensemble[i,i,t].real / NTraj) + "\t")
         PiiFile.write("\n")

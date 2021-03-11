@@ -1,7 +1,7 @@
 import numpy as np
 
 class parameters():
-   NSteps = 10**3 #int(2*10**6)
+   NSteps = 1200 #int(2*10**6)
    NTraj = 50
    dtN = 1
    dtE = dtN/20
@@ -9,6 +9,7 @@ class parameters():
    M = 2000
    initState = 0
    stype = "focused"
+   nskip = 5
 
 def Hel(R):
     A = 0.1
