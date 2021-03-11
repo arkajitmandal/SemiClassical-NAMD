@@ -89,7 +89,7 @@ def getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, step):
     rho = np.zeros(( len(qF), len(qF) ), dtype=complex) # Define density matrix
     rho0 = (qF0 - 1j*pF0) * (qB0 + 1j*pB0)
     for i in range(len(qF)):
-       for j in range(j,len(qF)):
+       for j in range(i,len(qF)):
           rho[i,j] = 0.25 * (qF[i] + 1j*pF[i]) * (qB[j] - 1j*pB[j]) * rho0
           rho[j,i] = rho[i,j] 
     return rho

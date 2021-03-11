@@ -1,6 +1,6 @@
-#!/software/python3/3.8.3/bin/python3
+#!/software/anaconda3/2020.07/bin/python
 #SBATCH -p action 
-#SBATCH -o my_output_%j
+#SBATCH -o output.log
 #SBATCH --mem-per-cpu=1GB
 #SBATCH -t 1:00:00
 #SBATCH -N 1
@@ -15,7 +15,7 @@ import numpy as np
 
 t0 = time.time()
 #----------------
-trajs = 40 
+trajs = model.parameters.NTraj
 #----------------
 
 #------------------------------------------------------------------------------------------
@@ -25,13 +25,13 @@ cpu = int(sbatch[-1].split("=")[-1].replace("\n",""))
 nodes = int(sbatch[-2].split()[-1].replace("\n",""))
 print (f"nodes : {nodes} | cpu : {cpu}")
 procs = cpu * nodes
-print (f"Total trajectories {procs * trajs}")
 ntraj = procs * trajs
+print (f"Total trajectories {ntraj}")
 #------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------
 
 t1 = time.time()
-with Pool(cpu) as p:
+with Pool(procs) as p:
 
     NSteps = model.parameters.NSteps
     NTraj = model.parameters.NTraj
@@ -45,17 +45,17 @@ with Pool(cpu) as p:
         par.SEED   = np.random.randint(0,100000000)
         args.append(par)
     #-----------------------------------------------
-    print("Running : " + str(par.NTraj*cpu) + " trajectories in %s cpu"%(cpu) )
+    print(f"Running : {par.NTraj*procs}  trajectories in {procs} cpu" )
 
     #------------------- parallelization -----------------------------------
     rho_ensemble  = p.map(pldm.runTraj, args)
     #-----------------------------------------------------------------------
 
-    #------------------- Gather --------------------------------------------
-    rho_sum = np.zeros(rho_ensemble[0].shape, dtype = rho_ensemble[0].dtype)
-    for i in range(cpu):
-        for t in range(NSteps):
-            rho_sum[:,:,t] += rho_ensemble[i][:,:,t]
+#------------------- Gather --------------------------------------------
+rho_sum = np.zeros(rho_ensemble[0].shape, dtype = rho_ensemble[0].dtype)
+for i in range(procs):
+    for t in range(NSteps):
+        rho_sum[:,:,t] += rho_ensemble[i][:,:,t]
 
 
 PiiFile = open("Pii.txt","w") 
@@ -63,8 +63,9 @@ NTraj = model.parameters().NTraj
 for t in range(NSteps):
     PiiFile.write(str(t) + "\t")
     for i in range(NStates):
-        PiiFile.write(str(rho_sum[i,i,t].real / (  cpu * NTraj ) ) + "\t")
+        PiiFile.write(str(rho_sum[i,i,t].real / (  procs * NTraj ) ) + "\t")
     PiiFile.write("\n")
 PiiFile.close()
-        
-print(time.time()-t1)
+t2 = time.time()-t1
+print(f"Total Time: {t2}")
+print(f"Time per trajectory: {t2/ntraj}")
