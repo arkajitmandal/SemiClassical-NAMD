@@ -22,55 +22,36 @@ def initMapping(Nstates, initState = 0, stype = "focused"):
        pB = np.array([ np.random.normal() for i in range(Nstates)]) 
     return qF, qB, pF, pB 
 
-def Umap(qF, qB, pF, pB, dt, R):
-    NStates = len(qF)
-    VMat = Hel(R)
+def Umap(qF, qB, pF, pB, dt, VMat):
     qFin, qBin, pFin, pBin = qF, qB, pF, pB # Store input position and momentum for verlet propogation
     # Store initial array containing sums to use at second derivative step
 
-    VMatxqB =  np.array([np.sum(VMat[k,:] * qBin[:]) for k in range(NStates)])
-    VMatxqF =  np.array([np.sum(VMat[k,:] * qFin[:]) for k in range(NStates)])
-    """
-    for i in range(NStates): # Loop over q's and p's for initial update of positions
-       # Update momenta using input positions (first-order in dt)
-       pB[i] -= 0.5 * dt * np.sum(VMat[i,:] * qBin[:]) ## First Derivatives ##
-       pF[i] -= 0.5 * dt * np.sum(VMat[i,:] * qFin[:])
-       
-       # Now update positions with input momenta (first-order in dt)
-       qB[i] += dt * np.sum(VMat[i,:] * pBin[:])
-       qF[i] += dt * np.sum(VMat[i,:] * pFin[:])
-       #----------------------------------------------------------------------------
-       for k in range(NStates):
-           # Update positions to second order in dt
-           qB[i] -= (dt**2/2.0) * (VMat[i,k])* VMatxqB[k] ## Second Derivatives ##
-           qF[i] -= (dt**2/2.0) * (VMat[i,k])* VMatxqF[k]
-    """
+    VMatxqB =  VMat @ qBin #np.array([np.sum(VMat[k,:] * qBin[:]) for k in range(NStates)])
+    VMatxqF =  VMat @ qFin #np.array([np.sum(VMat[k,:] * qFin[:]) for k in range(NStates)])
+
     # Update momenta using input positions (first-order in dt)
-    pB -= 0.5 * dt * VMat @ qBin #np.sum(VMat[i,:] * qBin[:])
-    pF -= 0.5 * dt * VMat @ qFin # np.sum(VMat[i,:] * qFin[:])
+    pB -= 0.5 * dt * VMatxqB  # VMat @ qBin  
+    pF -= 0.5 * dt * VMatxqF  # VMat @ qFin  
     # Now update positions with input momenta (first-order in dt)
-    qB += dt * VMat @ pBin # np.sum(VMat[i,:] * pBin[:])
-    qF += dt * VMat @ pFin # np.sum(VMat[i,:] * pFin[:])
+    qB += dt * VMat @ pBin  
+    qF += dt * VMat @ pFin  
     # Update positions to second order in dt
     qB -=  (dt**2/2.0) * VMat @ VMatxqB 
     qF -=  (dt**2/2.0) * VMat @ VMatxqF
        #-----------------------------------------------------------------------------
     # Update momenta using output positions (first-order in dt)
-    pB -= 0.5 * dt * VMat @ qB # np.sum(VMat[i,:] * qB[:])
-    pF -= 0.5 * dt * VMat @ qF # np.sum(VMat[i,:] * qF[:])
-    """
-    for i in range(NStates): # Loop over q's and p's for final update of fictitious momentum
-       pB[i] -= 0.5 * dt * np.sum(VMat[i,:] * qB[:])
-       pF[i] -= 0.5 * dt * np.sum(VMat[i,:] * qF[:])
-    """
+    pB -= 0.5 * dt * VMat @ qB  
+    pF -= 0.5 * dt * VMat @ qF  
+
     return qF, qB, pF, pB
 
 def Force(R, qF, qB, pF, pB):
-    dH = dHel(R) # Nxnxn Matrix, N = Nuclear DOF, n = NStates
+    dH = dHel(R) # Nxnxn Matrix, N = Nuclear DOF, n = NStates 
     F = np.zeros((len(R)))
     for i in range(len(qF)):
-        for j in range(len(qF)):
-            F -= 0.25 * dH[i,j,:] * ( qF[i] * qF[j] + pF[i] * pF[j] + qB[i] * qB[j] + pB[i] * pB[j])
+        F -= 0.25 * dH[i,i,:] * ( qF[i] ** 2 + pF[i] ** 2 + qB[i] ** 2 + pB[i] ** 2)
+        for j in range(i+1, len(qF)):
+            F -= 0.5 * dH[i,j,:] * ( qF[i] * qF[j] + pF[i] * pF[j] + qB[i] * qB[j] + pB[i] * pB[j])
     return F
 
 def VelVerF(R, P, qF, qB, pF, pB, dtI, dtE, F1,  M=1): # Ionic position, ionic velocity, etc.
@@ -78,20 +59,16 @@ def VelVerF(R, P, qF, qB, pF, pB, dtI, dtE, F1,  M=1): # Ionic position, ionic v
     #F1 = Force(R, qF, qB, pF, pB)
     R += v * dtI + 0.5 * F1 * dtI ** 2 / M
     EStep = int(dtI/dtE)
+    Hij = Hel(R)
     for t in range(EStep):
-        qF, qB, pF, pB = Umap(qF, qB, pF, pB, dtE, R)
+        qF, qB, pF, pB = Umap(qF, qB, pF, pB, dtE, Hij)
     F2 = Force(R, qF, qB, pF, pB)
     v += 0.5 * (F1 + F2) * dtI / M
     return R, v*M, qF, qB, pF, pB, F2
 
 def getPopulation(qF, qB, pF, pB, qF0, qB0, pF0, pB0, step):
-    #print (step/NSteps * 100, "%")
-    rho = np.zeros(( len(qF), len(qF) ), dtype=complex) # Define density matrix
-    rho0 = (qF0 - 1j*pF0) * (qB0 + 1j*pB0)
-    for i in range(len(qF)):
-       for j in range(i,len(qF)):
-          rho[i,j] = 0.25 * (qF[i] + 1j*pF[i]) * (qB[j] - 1j*pB[j]) * rho0
-          rho[j,i] = rho[i,j] 
+    rho0 = 0.25 * (qF0 - 1j*pF0) * (qB0 + 1j*pB0)
+    rho = np.outer(qF + 1j*pF, qB-1j*pB) * rho0
     return rho
 
 
