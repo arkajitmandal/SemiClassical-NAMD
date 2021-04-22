@@ -5,8 +5,8 @@
 #SBATCH -t 1:00:00
 #SBATCH -N 1
 #SBATCH --ntasks-per-node=24
-import sys
-sys.path.append('/scratch/amandal4/PLDM-python/clean/PLDM-python')
+import sys, os
+sys.path.append(os.popen("pwd").read().replace("\n",""))
 import pldm
 import model
 from multiprocessing import Pool

@@ -2,13 +2,13 @@ import numpy as np
 
 class parameters():
    NSteps = 1200 #int(2*10**6)
-   NTraj = 50
+   NTraj = 200
    dtN = 1
    dtE = dtN/20
    NStates = 2
    M = 2000
    initState = 0
-   stype = "focused"
+   stype = "multiple focused"
    nskip = 5
 
 def Hel(R):
