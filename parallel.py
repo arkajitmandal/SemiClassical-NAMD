@@ -7,8 +7,10 @@
 #SBATCH --ntasks-per-node=24
 import sys, os
 sys.path.append(os.popen("pwd").read().replace("\n",""))
-import pldm
-import model
+#-------------------------
+import pldm as method
+import spinBoson as model
+#-------------------------
 from multiprocessing import Pool
 import time 
 import numpy as np
@@ -17,14 +19,17 @@ t0 = time.time()
 #----------------
 trajs = model.parameters.NTraj
 #----------------
-
+try:
+    fold = sys.argv[1]
+except:
+    fold = "."
 #------------------------------------------------------------------------------------------
 #--------------------------- SBATCH -------------------------------------------------------
 sbatch = [i for i in open('parallel.py',"r").readlines() if i[:10].find("#SBATCH") != -1 ]
 cpu = int(sbatch[-1].split("=")[-1].replace("\n","")) 
 nodes = int(sbatch[-2].split()[-1].replace("\n",""))
 print (f"nodes : {nodes} | cpu : {cpu}")
-procs = cpu * nodes
+procs = cpu * nodes  
 ntraj = procs * trajs
 print (f"Total trajectories {ntraj}")
 #------------------------------------------------------------------------------------------
@@ -48,7 +53,7 @@ with Pool(procs) as p:
     print(f"Running : {par.NTraj*procs}  trajectories in {procs} cpu" )
 
     #------------------- parallelization -----------------------------------
-    rho_ensemble  = p.map(pldm.runTraj, args)
+    rho_ensemble  = p.map(method.runTraj, args)
     #-----------------------------------------------------------------------
 
 #------------------- Gather --------------------------------------------
@@ -58,10 +63,10 @@ for i in range(procs):
         rho_sum[:,:,t] += rho_ensemble[i][:,:,t]
 
 
-PiiFile = open("Pii.txt","w") 
+PiiFile = open(f"{fold}/Pii.txt","w") 
 NTraj = model.parameters().NTraj
 for t in range(rho_ensemble[0].shape[-1]):
-    PiiFile.write(f"{t * model.parameters.nskip} \t")
+    PiiFile.write(f"{t * model.parameters.nskip * model.parameters.dtN} \t")
     for i in range(NStates):
         PiiFile.write(str(rho_sum[i,i,t].real / (  procs * NTraj ) ) + "\t")
     PiiFile.write("\n")

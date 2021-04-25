@@ -23,6 +23,9 @@ def Hel(R):
     VMat[0,1] = VMat[1,0]
     VMat[1,1] = -A * np.exp(-B * R**2) + E0
     return VMat
+    
+def dHel0(R):
+    return 0
 
 def dHel(R):
     A = 0.1

@@ -1,6 +1,6 @@
 import numpy as np
-import model
-from model import Hel, dHel, initR
+import spinBoson as model
+from spinBoson import Hel, dHel, initR, dHel0
 import random
 
 # Initialization of the mapping Variables
@@ -15,14 +15,7 @@ def initMapping(Nstates, initState = 0, stype = "focused"):
         qB[initState] = 1.0
         pF[initState] = 1.0
         pB[initState] = -1.0 # This minus sign allows for backward motion of fictitious oscillator
-    elif (stype == "multiple focused"):
-        istate = random.randint(0,Nstates-1)
-        jstate = random.randint(0,Nstates-1)
-        qF[istate] = 1.0
-        qB[jstate] = 1.0
-        pF[istate] = 1.0
-        pB[jstate] = -1.0 # This minus sign allows for backward motion of fictitious oscillator
-    else:
+    elif (stype == "sampled"):
        qF = np.array([ np.random.normal() for i in range(Nstates)]) 
        qB = np.array([ np.random.normal() for i in range(Nstates)]) 
        pF = np.array([ np.random.normal() for i in range(Nstates)]) 
@@ -54,7 +47,9 @@ def Umap(qF, qB, pF, pB, dt, VMat):
 
 def Force(R, qF, qB, pF, pB):
     dH = dHel(R) # Nxnxn Matrix, N = Nuclear DOF, n = NStates 
+    dH0 = dHel0(R)
     F = np.zeros((len(R)))
+    F -= dH0
     for i in range(len(qF)):
         F -= 0.25 * dH[i,i,:] * ( qF[i] ** 2 + pF[i] ** 2 + qB[i] ** 2 + pB[i] ** 2)
         for j in range(i+1, len(qF)):
@@ -110,8 +105,10 @@ def runTraj(parameters = model.parameters):
         rho0 = 0.25 * (qF0 - 1j*pF0) * (qB0 + 1j*pB0)
 
         #----- for enhance sampling ----------
-        if (parameters.stype == "multiple focused"):
-            rho0 = rho0/(NStates**2)
+        
+        if (parameters.stype.find("multiple focused") != -1):
+            rho0 = rho0 * (NStates**2)
+        
         #----- Initial Force --------
         F1 = Force(R, qF, qB, pF, pB)
         iskip = 0
