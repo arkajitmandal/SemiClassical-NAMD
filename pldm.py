@@ -1,4 +1,5 @@
 import numpy as np
+import sys, os
 sys.path.append(os.popen("pwd").read().replace("\n","")+"/Model")
 import spinBoson as model
 from spinBoson import Hel, dHel, initR, dHel0
