@@ -6,7 +6,7 @@ filename = sys.argv[1]
 outName = filename
 fold = int(sys.argv[2])
 
-dirs = [f"run-{i}" for i in  range(fold)]
+dirs = [f"RUN/run-{i}" for i in  range(fold)]
 
 dat = np.loadtxt(dirs[0]+"/"+filename) 
 for i in range(1, fold):

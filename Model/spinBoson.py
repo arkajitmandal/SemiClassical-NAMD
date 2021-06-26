@@ -31,7 +31,7 @@ class parameters():
    NSteps = 2000 #int(2*10**6)
    NTraj = 200
    dtN = 0.01
-   dtE = dtN/50
+   dtE = dtN/30
    NStates = 2
    M = 1
    initState = 0
