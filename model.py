@@ -8,7 +8,7 @@ class parameters():
    NStates = 2
    M = 2000
    initState = 0
-   stype = "multiple focused"
+   stype = "focused"
    nskip = 5
 
 def Hel(R):

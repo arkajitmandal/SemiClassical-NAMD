@@ -56,17 +56,20 @@ def Force(R, qF, qB, pF, pB):
             F -= 0.5 * dH[i,j,:] * ( qF[i] * qF[j] + pF[i] * pF[j] + qB[i] * qB[j] + pB[i] * pB[j])
     return F
 
-def VelVerF(R, P, qF, qB, pF, pB, dtI, dtE, F1,  M=1): # Ionic position, ionic velocity, etc.
+def VelVer(R, P, qF, qB, pF, pB, dtI, dtE, F1, Hij,M=1): # Ionic position, ionic velocity, etc.
     v = P/M
+    EStep = int(dtI/dtE)
+    # Hij = Hel(R)
+    for t in range(EStep):
+        qF, qB, pF, pB = Umap(qF, qB, pF, pB, dtE/2, Hij)
     #F1 = Force(R, qF, qB, pF, pB)
     R += v * dtI + 0.5 * F1 * dtI ** 2 / M
-    EStep = int(dtI/dtE)
     Hij = Hel(R)
     for t in range(EStep):
-        qF, qB, pF, pB = Umap(qF, qB, pF, pB, dtE, Hij)
+        qF, qB, pF, pB = Umap(qF, qB, pF, pB, dtE/2, Hij)
     F2 = Force(R, qF, qB, pF, pB)
     v += 0.5 * (F1 + F2) * dtI / M
-    return R, v*M, qF, qB, pF, pB, F2
+    return R, v*M, qF, qB, pF, pB, F2, Hij
 
 def pop(qF, qB, pF, pB, rho0):
     return np.outer(qF + 1j*pF, qB-1j*pB) * rho0
@@ -90,10 +93,11 @@ def runTraj(parameters = model.parameters):
     nskip = parameters.nskip
     #---------------------------
 
-
     rho_ensemble = np.zeros((NStates,NStates,NSteps//nskip), dtype=complex)
-    for itraj in range(NTraj): # Ensemble
+    # Ensemble
+    for itraj in range(NTraj): 
         R,P = initR()
+        vv  = VelVer
 
         # Call function to initialize fictitious oscillators 
         # according to focused ("Default") or according 
@@ -104,13 +108,9 @@ def runTraj(parameters = model.parameters):
         qF0, qB0, pF0, pB0 = qF[initState], qB[initState], pF[initState], pB[initState] 
         rho0 = 0.25 * (qF0 - 1j*pF0) * (qB0 + 1j*pB0)
 
-        #----- for enhance sampling ----------
-        
-        if (parameters.stype.find("multiple focused") != -1):
-            rho0 = rho0 * (NStates**2)
-        
         #----- Initial Force --------
         F1 = Force(R, qF, qB, pF, pB)
+        Hij = Hel(R)
         iskip = 0
         for i in range(NSteps): # One trajectory
             #------- ESTIMATORS-------------------------------------
@@ -118,7 +118,7 @@ def runTraj(parameters = model.parameters):
                 rho_ensemble[:,:,iskip] += pop(qF, qB, pF, pB, rho0)
                 iskip += 1
             #-------------------------------------------------------
-            R, P, qF, qB, pF, pB, F1 = VelVerF(R, P, qF, qB, pF, pB, dtN, dtE, F1, M)
+            R, P, qF, qB, pF, pB, F1, Hij = vv(R, P, qF, qB, pF, pB, dtN, dtE, F1, Hij, M)
 
     return rho_ensemble
 
