@@ -1,14 +1,14 @@
 import numpy as np
 
 class parameters():
-   NSteps = 1200 #int(2*10**6)
-   NTraj = 400
-   dtN = 1
+   NSteps = 600 #int(2*10**6)
+   NTraj = 100
+   dtN = 2
    dtE = dtN/20
    NStates = 2
    M = 2000
    initState = 0
-   stype = "focused"
+   stype = "sampled"
    nskip = 5
 
 def Hel(R):
@@ -22,10 +22,14 @@ def Hel(R):
     VMat[1,0] = C * np.exp(-D * R**2)
     VMat[0,1] = VMat[1,0]
     VMat[1,1] = -A * np.exp(-B * R**2) + E0
+
+
     return VMat
     
 def dHel0(R):
-    return 0
+    A = 0.1
+    B = 0.28
+    return -0.5 * A * np.exp(-B * R**2) * (-2 * B * R)
 
 def dHel(R):
     A = 0.1
@@ -37,6 +41,10 @@ def dHel(R):
     dVMat[1,0,0] = C * np.exp(-D * R**2) * (-2 * D * R)
     dVMat[0,1,0] = dVMat[1,0]
     dVMat[1,1,0] = -A * np.exp(-B * R**2) * (-2 * B * R)
+
+    tr = 0.5*(dVMat[1,1,0] + dVMat[0,0,0])
+    dVMat[0,0,0] -= tr
+    dVMat[1,1,0] -= tr
     return dVMat
 
 def initR():
