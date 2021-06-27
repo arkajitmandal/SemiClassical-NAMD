@@ -73,7 +73,7 @@ def VelVer(dat) : # R, P, qF, qB, pF, pB, dtI, dtE, F1, Hij,M=1): # Ionic positi
     # half-step mapping
     for t in range(EStep):
         qF, qB, pF, pB = Umap(qF, qB, pF, pB, par.dtE/2.0, dat.Hij)
-    dat.qF, dat.qB, dat.pF, dat.pB = qF, qB, pF, pB 
+    dat.qF, dat.qB, dat.pF, dat.pB = qF * 1, qB * 1, pF * 1, pB * 1 
 
     # ======= Nuclear Block ==================================
     F1    =  Force(dat) # force with {qF(t+dt/2)} * dH(R(t))
