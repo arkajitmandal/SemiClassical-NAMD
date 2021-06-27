@@ -154,7 +154,15 @@ def runTraj(parameters):
 
 if __name__ == "__main__": 
     import spinBoson as model
-    rho_ensemble = runTraj(model.parameters)
+    par =  model.parameters
+    
+    par.dHel = model.dHel
+    par.dHel0 = model.dHel0
+    par.initR = model.initR
+    par.Hel   = model.Hel
+
+    rho_ensemble = runTraj(par)
+    
     NSteps = model.parameters.NSteps
     NTraj = model.parameters.NTraj
     NStates = model.parameters.NStates
