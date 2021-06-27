@@ -1,8 +1,6 @@
 import numpy as np
 import sys, os
-sys.path.append(os.popen("pwd").read().replace("\n","")+"/Model")
-import spinBoson as model
-from spinBoson import Hel, dHel, initR, dHel0
+
 import random
 
 class Bunch:
@@ -81,11 +79,11 @@ def VelVer(dat) : # R, P, qF, qB, pF, pB, dtI, dtE, F1, Hij,M=1): # Ionic positi
     F1    =  Force(dat) # force with {qF(t+dt/2)} * dH(R(t))
     dat.R += v * par.dtN + 0.5 * F1 * par.dtN ** 2 / par.M
     
-    
-    dat.Hij  = Hel(dat.R)
-    dat.dHij = dHel(dat.R)
-    dat.dH0  = dHel0(dat.R)
-    
+    #------ Do QM ----------------
+    dat.Hij  = par.Hel(dat.R)
+    dat.dHij = par.dHel(dat.R)
+    dat.dH0  = par.dHel0(dat.R)
+    #-----------------------------
     F2 = Force(dat) # force with {qF(t+dt/2)} * dH(R(t+ dt))
     v += 0.5 * (F1 + F2) * par.dtN / par.M
 
@@ -93,7 +91,7 @@ def VelVer(dat) : # R, P, qF, qB, pF, pB, dtI, dtE, F1, Hij,M=1): # Ionic positi
     # =======================================================
     
     # half-step mapping
-    dat.Hij = Hel(dat.R)
+    dat.Hij = par.Hel(dat.R) # do QM
     for t in range(EStep):
         qF, qB, pF, pB = Umap(qF, qB, pF, pB, par.dtE/2, dat.Hij)
     dat.qF, dat.qB, dat.pF, dat.pB = qF, qB, pF, pB 
@@ -105,7 +103,7 @@ def VelVer(dat) : # R, P, qF, qB, pF, pB, dtI, dtE, F1, Hij,M=1): # Ionic positi
 def pop(dat):
     return np.outer(dat.qF + 1j * dat.pF, dat.qB-1j*dat.pB) * dat.rho0
 
-def runTraj(parameters = model.parameters):
+def runTraj(parameters):
     #------- Seed --------------------
     try:
         np.random.seed(parameters.SEED)
@@ -125,8 +123,8 @@ def runTraj(parameters = model.parameters):
     # Ensemble
     for itraj in range(NTraj): 
         # Trajectory data
-        dat = Bunch(param = parameters)
-        dat.R, dat.P = initR()
+        dat = Bunch(param =  parameters )
+        dat.R, dat.P = parameters.initR()
 
         # set propagator
         vv  = VelVer
@@ -139,9 +137,9 @@ def runTraj(parameters = model.parameters):
         dat.rho0 = 0.25 * (qF0 - 1j*pF0) * (qB0 + 1j*pB0)
 
         #----- Initial QM --------
-        dat.Hij  = Hel(dat.R)
-        dat.dHij = dHel(dat.R)
-        dat.dH0  = dHel0(dat.R)
+        dat.Hij  = parameters.Hel(dat.R)
+        dat.dHij = parameters.dHel(dat.R)
+        dat.dH0  = parameters.dHel0(dat.R)
         #----------------------------
         iskip = 0 # please modify
         for i in range(NSteps): # One trajectory
@@ -155,6 +153,7 @@ def runTraj(parameters = model.parameters):
     return rho_ensemble
 
 if __name__ == "__main__": 
+    import spinBoson as model
     rho_ensemble = runTraj(model.parameters)
     NSteps = model.parameters.NSteps
     NTraj = model.parameters.NTraj

@@ -49,6 +49,14 @@ with Pool(procs) as p:
         par = model.parameters() 
         par.ID   = j
         par.SEED   = np.random.randint(0,100000000)
+        
+        #---- methods in model ------
+
+        par.dHel = model.dHel
+        par.dHel0 = model.dHel0
+        par.initR = model.initR
+        par.Hel   = model.Hel
+
         args.append(par)
     #-----------------------------------------------
     print(f"Running : {par.NTraj*procs}  trajectories in {procs} cpu" )
