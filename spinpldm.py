@@ -1,12 +1,20 @@
 import numpy as np
 import random
+"""
+This is a Focused-spinPLDM code 
+Here sampled mean all combinations 
+of forward-backward initialization 
+Here focused mean only forward backward 
+focused on initial state
+"""
+
 
 class Bunch:
     def __init__(self, **kwds):
         self.__dict__.update(kwds)
 
 # Initialization of the mapping Variables
-def initMapping(Nstates, F = 0, B = 0):
+def initMapping(NStates, F = 0, B = 0):
     """
     Returns np.array zF and zB (complex)
     Only Focused-PLDM implemented
@@ -128,12 +136,14 @@ def VelVer(dat) :
 
 
 def pop(dat):
-    rho = np.zeros((dat.NStates,dat.NStates),dtype=complex)
-    gamEvolved = dat.gw * dat.Ugam
-    for n in range( dat.NStates ):
-        for m in range(dat.NStates ):
-            rho[n,m] = 0.25 * ( dat.zB[n].conjugate() * dat.zB0[dat.initstate] - gamEvolved[ n,dat.initstate ].conjugate())\
-                            * ( dat.zF[m] * dat.zF0[dat.initstate].conjugate() - gamEvolved[ m,dat.initstate ] )
+    NStates = dat.param.NStates
+    iState = dat.param.initState
+    rho = np.zeros((NStates,NStates),dtype=complex)
+    γ = dat.gw * dat.Ugam
+    for n in range( NStates ):
+        for m in range(NStates ):
+            rho[n,m] = 0.25 * ( dat.zB[n].conjugate() * dat.zB0 - γ[ n,iState].conjugate())\
+                            * ( dat.zF[m] * dat.zF0.conjugate() - γ[ m,iState] )
 
     return rho
 
@@ -158,11 +168,7 @@ def runTraj(parameters):
         pl = 1
     rho_ensemble = np.zeros((NStates,NStates,NSteps//nskip + pl), dtype=complex)
 
-    print ("This is a Focused-spinPLDM code\n\
-            Here sampled mean all combinations\
-            of forward-backward initialization\n\
-            Here focused mean only forward backward\
-            focused on initial state")
+
     #---------------------------
     # Ensemble
     for itraj in range(NTraj): 
@@ -177,19 +183,20 @@ def runTraj(parameters):
         # weight for this trajectory
         F, B = iFB[0], iFB[1]
         W = 1.0 + (F!=B) * 1.0 
-
+ 
         gw = (2/NStates) * (np.sqrt(NStates + 1) - 1)
         # Trajectory data
         dat = Bunch(param =  parameters, gw = gw)
+        dat.Ugam = np.identity(NStates)
 
         # initialize R, P
         dat.R, dat.P = parameters.initR()
 
         # set propagator
         vv  = VelVer
-
+ 
         # Call function to initialize mapping variables
-
+ 
         # various 
         dat.zF, dat.zB  = initMapping(NStates, F, B) 
 
@@ -205,7 +212,7 @@ def runTraj(parameters):
         for i in range(NSteps): # One trajectory
             #------- ESTIMATORS-------------------------------------
             if (i % nskip == 0):
-                rho_ensemble[:,:,iskip] += pop(dat)
+                rho_ensemble[:,:,iskip] += pop(dat) * W
                 iskip += 1
             #-------------------------------------------------------
             dat = vv(dat)
