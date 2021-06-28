@@ -140,12 +140,11 @@ def pop(dat):
     iState = dat.param.initState
     rho = np.zeros((NStates,NStates),dtype=complex)
     γ = dat.gw * dat.Ugam
-    for n in range( NStates ):
-        for m in range(NStates ):
-            rho[n,m] = 0.25 * ( dat.zB[n].conjugate() * dat.zB0 - γ[ n,iState].conjugate())\
-                            * ( dat.zF[m] * dat.zF0.conjugate() - γ[ m,iState] )
 
-    return rho
+    rhoF = ( dat.zB[:].conjugate() * dat.zB0 - γ[:,iState].conjugate())
+    rhoB = ( dat.zF[:] * dat.zF0.conjugate() - γ[:,iState] )
+
+    return 0.25 * np.outer(rhoF, rhoB)
 
 def runTraj(parameters):
     #------- Seed --------------------
