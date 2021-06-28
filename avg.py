@@ -1,14 +1,32 @@
 import sys
-import os
 import numpy as np
-filename = sys.argv[1]
- 
-outName = filename
-fold = int(sys.argv[2])
+from glob import glob
 
-dirs = [f"RUN/run-{i}" for i in  range(fold)]
+try:
+    filename = sys.argv[1]
+    filenames = [filename]
+except:
+    print ("Averaging all .txt files")
+    filenames = [i.replace("RUN/run-0/","") for i in glob("RUN/run-0/*.txt")]
+    print (filenames)
 
-dat = np.loadtxt(dirs[0]+"/"+filename) 
-for i in range(1, fold):
-    dat += np.loadtxt(dirs[i]+"/"+filename)
-np.savetxt(outName,dat/fold )
+try:
+    fold = int(sys.argv[2])
+except:
+    print (f"Detected {len(glob('RUN/run-*'))} folders")
+    fold = len(glob("RUN/run-*"))
+    if fold == 0:
+        print("No outputs found!")
+        
+for filename in filenames:
+
+    
+    outName = filename
+
+
+    dirs = [f"RUN/run-{i}" for i in  range(fold)]
+
+    dat = np.loadtxt(dirs[0]+"/"+filename) 
+    for i in range(1, fold):
+        dat += np.loadtxt(dirs[i]+"/"+filename)
+    np.savetxt(outName,dat/fold )
