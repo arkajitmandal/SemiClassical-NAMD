@@ -35,7 +35,6 @@ class parameters():
    NStates = 2
    M = 1
    initState = 0
-   stype = "sampled"
    nskip = 10
    ε, ξ, β, ωc, Δ, ndof = model(3) # model3
    c, ω  = bathParam(ξ, ωc, ndof)
