@@ -11,6 +11,7 @@ sys.path.append(os.popen("pwd").read().replace("\n","")+"/Model")
 #-------------------------
 import pldm as method
 import spinBoson as model
+stype = "focused"
 #-------------------------
 from multiprocessing import Pool
 import time 
@@ -56,7 +57,7 @@ with Pool(procs) as p:
         par.dHel0 = model.dHel0
         par.initR = model.initR
         par.Hel   = model.Hel
-
+        par.stype = stype
         args.append(par)
     #-----------------------------------------------
     print(f"Running : {par.NTraj*procs}  trajectories in {procs} cpu" )
