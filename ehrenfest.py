@@ -12,11 +12,12 @@ class Bunch:
 # Initialization of the electronic part
 def initElectronic(Nstates, initState = 0):
     #global qF, qB, pF, pB, qF0, qB0, pF0, pB0
-    c = np.zeros((Nstates), dtype='complex')
+    c = np.zeros((Nstates), dtype='complex128')
     c[initState] = 1.0
     return c
 
-def propagateCi(c,Vij, dt):
+def propagateCi(ci,Vij, dt):
+    c = ci * 1.0
     # https://thomasbronzwaer.wordpress.com/2016/10/15/numerical-quantum-mechanics-the-time-dependent-schrodinger-equation-ii/
     ck1 = (-1j) * (Vij @ c)
     ck2 = (-1j) * (Vij @ c + (dt/2.0) * ck1 )
@@ -103,7 +104,7 @@ def runTraj(parameters):
         vv  = VelVer
 
         # Call function to initialize mapping variables
-        ci = initElectronic(NStates, initState) # np.array([0,1])
+        dat.ci = initElectronic(NStates, initState) # np.array([0,1])
 
         #----- Initial QM --------
         dat.Hij  = parameters.Hel(dat.R)
