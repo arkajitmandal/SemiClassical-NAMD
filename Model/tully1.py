@@ -21,7 +21,7 @@ def Hel(R):
     V[0,1] = C*np.exp(-D*R**2)
     V[1,0] = V[0,1]
 
-    return Vij
+    return V
 
 def dHel0(R):
     return 0
@@ -31,13 +31,13 @@ def dHel(R):
     B = 1.6
     C = 0.005
     D = 1.0
-    dVMat = np.zeros((2,2,1))
-    dVMat[0,0,0] = A*B*np.exp(-B*np.abs(x))
-    dVMat[1,0,0] = C * np.exp(-D * R**2) * (-2 * D * R)
-    dVMat[0,1,0] = dVMat[1,0,0]
-    dVMat[1,1,0] = -dV[0,0,0]
+    dVij = np.zeros((2,2,1))
+    dVij[0,0,0] = A*B*np.exp(-B*np.abs(R))
+    dVij[1,0,0] = C * np.exp(-D * R**2) * (-2 * D * R)
+    dVij[0,1,0] = dVij[1,0,0]
+    dVij[1,1,0] = -dVij[0,0,0]
 
-    return dVMat
+    return dVij
 
 def initR():
     R0 = -9.0
