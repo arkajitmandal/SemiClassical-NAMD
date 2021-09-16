@@ -1,5 +1,5 @@
 import numpy as np
-import sys, os
+import sys, os 
 sys.path.append(os.popen("pwd").read().replace("\n",""))
 sys.path.append(os.popen("pwd").read().replace("\n","")+"/Model")
 
@@ -37,24 +37,25 @@ def Force(dat):
     for i in range(len(ci)):
         F -= dH[i,i,:]  * (ci[i] * ci[i].conjugate() ).real
         for j in range(i+1, len(ci)):
-            F -= 2.0 * dH[i,j,:]  * (ci[i] * ci[j].conjugate() ).real
+            F -= 2.0 * dH[i,j,:]  * (ci[i].conjugate() * ci[j] ).real
     return F
 
 def VelVer(dat) : 
     par =  dat.param
     v = dat.P/par.M
+    F1 = dat.F1 
     # electronic wavefunction
     ci = dat.ci * 1.0
     
     EStep = int(par.dtN/par.dtE)
-    
-    # electronic evolution
-    for t in range(EStep):
-        ci = propagateCi(ci, dat.Hij, par.dtE)   
+
+    # half electronic evolution
+    for t in range(int(np.floor(EStep/2))):
+        ci = propagateCi(ci, dat.Hij, par.dtE)  
+    ci /= np.sum(ci.conjugate()*ci) 
     dat.ci = ci * 1.0 
 
     # ======= Nuclear Block ==================================
-    F1    =  Force(dat) # force  at t1
     dat.R += v * par.dtN + 0.5 * F1 * par.dtN ** 2 / par.M
     
     #------ Do QM ----------------
@@ -64,10 +65,15 @@ def VelVer(dat) :
     #-----------------------------
     F2 = Force(dat) # force at t2
     v += 0.5 * (F1 + F2) * par.dtN / par.M
-
+    dat.F1 = F2
     dat.P = v * par.M
     # ======================================================
-    
+    # half electronic evolution
+    for t in range(int(np.ceil(EStep/2))):
+        ci = propagateCi(ci, dat.Hij, par.dtE)  
+    ci /= np.sum(ci.conjugate()*ci)  
+    dat.ci = ci * 1.0 
+
     return dat
 
 
@@ -99,7 +105,7 @@ def runTraj(parameters):
         # Trajectory data
         dat = Bunch(param =  parameters )
         dat.R, dat.P = parameters.initR()
-
+        
         # set propagator
         vv  = VelVer
 
@@ -110,6 +116,7 @@ def runTraj(parameters):
         dat.Hij  = parameters.Hel(dat.R)
         dat.dHij = parameters.dHel(dat.R)
         dat.dH0  = parameters.dHel0(dat.R)
+        dat.F1 = Force(dat) # Initial Force
         #----------------------------
         iskip = 0 # please modify
         for i in range(NSteps): # One trajectory
