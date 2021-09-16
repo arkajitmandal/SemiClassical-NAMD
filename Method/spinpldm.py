@@ -95,9 +95,9 @@ def VelVer(dat) :
     EStep = int(par.dtN/par.dtE)
 
     # half-step mapping
-    for t in range(EStep):
-        zF = Umap(zF, par.dtE/2, dat.Hij)
-        zB = Umap(zB, par.dtE/2, dat.Hij)
+    for t in range(int(np.floor(EStep/2))):
+        zF = Umap(zF, par.dtE, dat.Hij)
+        zB = Umap(zB, par.dtE, dat.Hij)
     dat.zF, dat.zB = zF * 1, zB * 1 
 
     # ======= Nuclear Block ==================================
@@ -119,9 +119,9 @@ def VelVer(dat) :
     dat.Hij = par.Hel(dat.R) # do QM
 
 
-    for t in range(EStep):
-        zF = Umap(zF, par.dtE/2, dat.Hij)
-        zB = Umap(zB, par.dtE/2, dat.Hij)
+    for t in range(int(np.ceil(EStep/2))):
+        zF = Umap(zF, par.dtE, dat.Hij)
+        zB = Umap(zB, par.dtE, dat.Hij)
     dat.zF, dat.zB = zF * 1, zB * 1 
     
 
