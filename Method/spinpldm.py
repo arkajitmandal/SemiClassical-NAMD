@@ -172,16 +172,27 @@ def runTraj(parameters):
     # Ensemble
     for itraj in range(NTraj): 
       # Stype (Forward-Backward combinations)
-      if stype == "sampled":
+      if stype == "half":
         FB = [[initState,i] for i in range(NStates)]
+        Wi  = [(ij[0]!=ij[1])+1 for ij in FB]
 
-      if stype == "focused":
+      elif stype == "focused":
         FB = [[initState,initState]]
+        Wi = [1]
+      elif stype == "all":
+        FB = []
+        for i in range(NStates):
+            for j in range(NStates):
+                FB.append([i,j])
+        Wi = [1 for i in FB]
       #---------------------------------------
-      for iFB in FB:
+
+
+      for ifb in range(len(FB)):
+        iFB = FB[ifb]
         # weight for this trajectory
         F, B = iFB[0], iFB[1]
-        W = 1.0 + (F!=B) * 1.0 
+        W = Wi[ifb] #1.0 + (F!=B) * 1.0 
  
         gw = (2/NStates) * (np.sqrt(NStates + 1) - 1)
         # Trajectory data
