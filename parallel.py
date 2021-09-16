@@ -6,7 +6,7 @@
 #SBATCH -N 1
 #SBATCH --ntasks-per-node=24
 import sys, os
-sys.path.append(os.popen("pwd").read().replace("\n",""))
+sys.path.append(os.popen("pwd").read().replace("\n","")+"/Method")
 sys.path.append(os.popen("pwd").read().replace("\n","")+"/Model")
 #-------------------------
 import pldm as method
