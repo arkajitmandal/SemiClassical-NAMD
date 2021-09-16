@@ -1,0 +1,2 @@
+Model                = tully2
+Method               = pldm-focused 

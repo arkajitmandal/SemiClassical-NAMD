@@ -9,9 +9,23 @@ import sys, os
 sys.path.append(os.popen("pwd").read().replace("\n","")+"/Method")
 sys.path.append(os.popen("pwd").read().replace("\n","")+"/Model")
 #-------------------------
-import pldm as method
-import spinBoson as model
-stype = "focused"
+try:
+    input = open(sys.argv[1], 'r').readlines()
+    print(f"Reading {sys.argv[1]}")
+except:
+    print("Reading input.txt")
+    input = open('input.txt', 'r').readlines()
+
+
+def getInput(input,key):
+    txt = [i for i in input if i.find(key)!=-1][0].split("=")[1].split("#", 1)[0].replace("\n","")
+    return txt.replace(" ","")
+
+model_ =  getInput(input,"Model")
+method_ = getInput(input,"Method").split("-")
+exec(f"import {model_} as model")
+exec(f"import {method_[0]} as method")
+stype = method_[1]
 #-------------------------
 from multiprocessing import Pool
 import time 
@@ -22,7 +36,7 @@ t0 = time.time()
 trajs = model.parameters.NTraj
 #----------------
 try:
-    fold = sys.argv[1]
+    fold = sys.argv[2]
 except:
     fold = "."
 #------------------------------------------------------------------------------------------
@@ -73,7 +87,7 @@ for i in range(procs):
         rho_sum[:,:,t] += rho_ensemble[i][:,:,t]
 
 
-PiiFile = open(f"{fold}/Pii.txt","w") 
+PiiFile = open(f"{fold}/{method_[0]}.{method_[1]}.{model_}","w") 
 NTraj = model.parameters().NTraj
 for t in range(rho_ensemble[0].shape[-1]):
     PiiFile.write(f"{t * model.parameters.nskip * model.parameters.dtN} \t")
