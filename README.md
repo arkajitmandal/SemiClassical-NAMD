@@ -107,9 +107,9 @@ To run the code you first change the preamble of the 'parallel.py'. Change it ac
 ```
 Then submit the job on your HPCC as:
 ```
-sbatch parallel.py folderName
+sbatch parallel.py whateverInput.txt folderName
 ```
-'folderName' is the folder where the output will be saved. The output file containing population dynamics is 'method.methodOption.modelName'.
+'whateverInput.txt' is the input file (described above) and 'folderName' is the folder where the output will be saved. The output file containing population dynamics is 'method.methodOption.modelName'.
 
 #### **Running using a multiple nodes.**
 _____________
