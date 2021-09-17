@@ -28,7 +28,7 @@ exec(f"import {method_[0]} as method")
 try:
     stype = method_[1]
 except:
-    stype = ""
+    stype = "_"
 #-------------------------
 from multiprocessing import Pool
 import time 

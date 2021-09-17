@@ -77,12 +77,39 @@ You can find several examples of model files inside the "Model" folder. I will e
 
 
 ### Step 3
-Prepare an input file:
+Prepare an input file (name it : 'whateverInput.txt'):
 ```
 Model                = tully2
 Method               = pldm-focused 
 ```
 
-The right hand side of the first line, _tully2_, tells the code to look for tully2.py inside the folder "Model". If you name your model file as  whateverModelName.py then you should write 'Model = whateverModelName' (without the '.py' part). 
+* Model : The right hand side of the first line, _tully2_, tells the code to look for tully2.py inside the folder "Model". If you name your model file as  whateverModelName.py then you should write 'Model = whateverModelName' (without the '.py' part). 
+* Method : Written as, method.methodOption. Select a quantum dynamics method. The available methods are :
+  - mfe : Mean-Field Ehrenfest Approach. Kind of worst approach you can think of.
+   - pldm-focused : Partial Linearized Density Matrix with focused initial conditions. Should be similar to mfe. Maybe slightly better. 
+   - pldm-sampled : Partial Linearized Density Matrix (PLDM) with sampled initial conditions or the original PLDM approach. Most of the time works well, sometimes does not. Very good if your potentials are Hermonic (like Spin-Boson systems)
+   - spinpldm-all: The Spin-Mapping PLDM approach with full sampling. Often better than PLDM. Reliable but slighly slow. If your initial electronic state is a pure state $| i \rangle \langle i|$ (you could start from a super position state, but you have to hack into this code to do that) use spinpldm-half to get the same result but much faster (by half).
+   - spinpldm-half: The Spin-Mapping PLDM approach, but with our in-house approximation. Works perfectly if starting with an initial electronic state that is a pure state $| i \rangle \langle i|$ (you could start from a super position state, but you have to hack into this code to do that). 
+   - spinpldm-focused: The Spin-Mapping PLDM approach, approximated. Good for short-time calculation and to get a general trend for longer time. 
+
+### Step 4 (slurm in an HPCC)
+#### Running using a single node.
+_____________
+To run the code you first change the preamble of the 'parallel.py'. Change it accordingly.  Which looks like:
+```py
+#!/software/anaconda3/2020.07/bin/python
+#SBATCH -p action 
+#SBATCH -o output.log
+#SBATCH --mem-per-cpu=1GB
+#SBATCH -t 1:00:00
+#SBATCH -N 1
+#SBATCH --ntasks-per-node=24
+```
+Then submit the job on your HPCC as:
+```
+sbatch parallel.py folderName
+```
+'folderName' is the folder where the output will be saved. The output file containing population dynamics is 'method.methodOption.modelName'.
+
 
 
