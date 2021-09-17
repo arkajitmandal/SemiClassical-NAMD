@@ -49,6 +49,7 @@ def Hel(R):
     # (NR = number of nuclear degrees of freedom)
     # See details below 
     return Vij
+
 def dHel0(R):
     # State independent gradient 
     # return dV0(R) : Vector of length NR
@@ -71,3 +72,17 @@ def initR():
     # See details below
     return R, P
 ```
+
+You can find several examples of model files inside the "Model" folder. I will explain each parts of this file in more detain in a section below.
+
+
+### Step 3
+Prepare an input file:
+```
+Model                = tully2
+Method               = pldm-focused 
+```
+
+The right hand side of the first line, _tully2_, tells the code to look for tully2.py inside the folder "Model". If you name your model file as  whateverModelName.py then you should write 'Model = whateverModelName' (without the '.py' part). 
+
+
