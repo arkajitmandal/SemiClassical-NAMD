@@ -93,7 +93,7 @@ Method               = pldm-focused
    - spinpldm-focused: The Spin-Mapping PLDM approach, approximated. Good for short-time calculation and to get a general trend for longer time. 
 
 ### Step 4 (slurm in an HPCC)
-#### Running using a single node.
+#### **Running using a single node.**
 _____________
 To run the code you first change the preamble of the 'parallel.py'. Change it accordingly.  Which looks like:
 ```py
@@ -111,6 +111,10 @@ sbatch parallel.py folderName
 ```
 'folderName' is the folder where the output will be saved. The output file containing population dynamics is 'method.methodOption.modelName'.
 
+#### **Running using a multiple nodes.**
+_____________
+_to be continued_...
+<!---
 # More details into Model
 
 A molecular Hamiltonian in the diabatic representation is written as:
@@ -121,5 +125,6 @@ where ${P}_{k}$ is the momentum for the $k$th nuclear degrees of freedom with ma
 
 
 For example consider a 1D dimentional model system, called the Tully's Model II. It has two electronic states and one nuclear DOF. Thus we write the Hamiltonian with one set of  $\{R,P\}$. _to be continued_...
+-->
 
 email: arkajitmandal@gmail.com
