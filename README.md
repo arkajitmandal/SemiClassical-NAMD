@@ -111,5 +111,15 @@ sbatch parallel.py folderName
 ```
 'folderName' is the folder where the output will be saved. The output file containing population dynamics is 'method.methodOption.modelName'.
 
+# More details into Model
+
+A molecular Hamiltonian in the diabatic representation is written as:
+
+$\hat{H} = \sum_{k}{{P}^{2}_{k}\over 2M_{k}} + \sum_{i,j} V_{ij}(\{R_{k}\})|i\rangle \langle j|$ 
+
+where ${P}_{k}$ is the momentum for the $k$th nuclear degrees of freedom with mass $M_{k}$. Further, $V_{ij}(\{R_{k}\})$ are matrix elements of the electronic part of the total Hamiltonian $\hat{H}$ in the diabatic basis $\{|i\rangle \}$.  That is, $V_{ij}(\{R_{k}\}) = \langle i| \hat{H} - \sum_{k}{{P}^{2}_{k}\over 2M_{k}} |j\rangle$. Of course most of times, we wave our hands, and make up models that describe $V_{ij}(\{R_{k}\})$ with some functions. If you know the analytical form of $V_{ij}(\{R_{k}\})$ you can write a model file: whateverModelName.py. 
 
 
+For example consider a 1D dimentional model system, called the Tully's Model II. It has two electronic states and one nuclear DOF. Thus we write the Hamiltonian with one set of  $\{R,P\}$. _to be continued_...
+
+email: arkajitmandal@gmail.com
