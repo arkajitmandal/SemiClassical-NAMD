@@ -25,7 +25,10 @@ model_ =  getInput(input,"Model")
 method_ = getInput(input,"Method").split("-")
 exec(f"import {model_} as model")
 exec(f"import {method_[0]} as method")
-stype = method_[1]
+try:
+    stype = method_[1]
+except:
+    stype = ""
 #-------------------------
 from multiprocessing import Pool
 import time 
