@@ -92,6 +92,7 @@ Method               = pldm-focused
    - spinpldm-half: The Spin-Mapping PLDM approach, but with our in-house approximation. Works perfectly if starting with an initial electronic state that is a pure state |i⟩⟨i| (you could start from a super position state, but you have to hack into this code to do that). 
    - spinpldm-focused: The Spin-Mapping PLDM approach, approximated. Good for short-time calculation and to get a general trend for longer time. 
    - sqc-square: The Symmetric Quasi-Classical Approach, with square window. Better than MFE. Cannot use it for more than several electronic states.  
+   - sqc-triangle: The Symmetric Quasi-Classical Approach, with triangle window. Better than sqc-square.   
 
 The output file containing population dynamics is 'method-methodOption-modelName.txt', for the above input file it would be: 
 
