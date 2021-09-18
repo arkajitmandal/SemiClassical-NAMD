@@ -1,5 +1,5 @@
 # Code for Performing Semi-Classical Quantum Dynamics
-The methods that are implimented in this code are : PLDM, spin-PLDM and MFE (Mean-Field Ehrenfest). The present code works for slurm based High-Performance Computing Cluster (HPCC) as well as on personal computers.  
+The methods that are implimented in this code are : PLDM, spin-PLDM, MFE (Mean-Field Ehrenfest) and SQC. The present code works for slurm based High-Performance Computing Cluster (HPCC) as well as on personal computers.  
 
 # Usage  
 ### Step 1
@@ -91,6 +91,7 @@ Method               = pldm-focused
    - spinpldm-all: The Spin-Mapping PLDM approach with full sampling. Often better than PLDM. Reliable but slighly slow. If your initial electronic state is a pure state |i⟩⟨i| (you could start from a super position state, but you have to hack into this code to do that) use spinpldm-half to get the same result but much faster (by half).
    - spinpldm-half: The Spin-Mapping PLDM approach, but with our in-house approximation. Works perfectly if starting with an initial electronic state that is a pure state |i⟩⟨i| (you could start from a super position state, but you have to hack into this code to do that). 
    - spinpldm-focused: The Spin-Mapping PLDM approach, approximated. Good for short-time calculation and to get a general trend for longer time. 
+   - sqc-square: The Symmetric Quasi-Classical Approach, with square window. Better than MFE. Cannot use it for more than several electronic states.  
 
 The output file containing population dynamics is 'method-methodOption-modelName.txt', for the above input file it would be: 
 
