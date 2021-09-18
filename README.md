@@ -76,7 +76,7 @@ def initR():
 You can find several examples of model files inside the "Model" folder. I will explain each parts of this file in more detain in a section below.
 
 
-### Step 3 (simple | serial)
+### Step 3 (simple | serial; on your pc/mac/linux)
 Prepare an input file (name it : 'whateverInput.txt'):
 ```
 Model                = tully2
