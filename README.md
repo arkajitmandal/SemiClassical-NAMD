@@ -76,7 +76,7 @@ def initR():
 You can find several examples of model files inside the "Model" folder. I will explain each parts of this file in more detain in a section below.
 
 
-### Step 3
+### Step 3 (simple)
 Prepare an input file (name it : 'whateverInput.txt'):
 ```
 Model                = tully2
@@ -92,24 +92,44 @@ Method               = pldm-focused
    - spinpldm-half: The Spin-Mapping PLDM approach, but with our in-house approximation. Works perfectly if starting with an initial electronic state that is a pure state $| i \rangle \langle i|$ (you could start from a super position state, but you have to hack into this code to do that). 
    - spinpldm-focused: The Spin-Mapping PLDM approach, approximated. Good for short-time calculation and to get a general trend for longer time. 
 
-### Step 4 (slurm in an HPCC)
-#### **Running using a single node.**
-_____________
-To run the code you first change the preamble of the 'parallel.py'. Change it accordingly.  Which looks like:
+The output file containing population dynamics is 'method-methodOption-modelName.txt', for the above input file it would be: 
+
+_pldm-focused-tully2.txt_
+
+### Step 3 (for slurm on HPCC) 
+Prepare an input file (name it : 'whateverInput.txt') for slurm submission in your computing cluster:
+```
+Model                = tully2
+Method               = pldm-focused 
+
+System               = slurm
+Nodes                = 2
+Cpus                 = 24
+Partition            = action    
+```
+For first two lines see previous section. 
+
+Last four lines provide additional commands for slurm submission. For adding additional slurm ('#SBATCH') command, add them in the preamble of the 'parallel.py'. The default preamble looks like:
 ```py
-#!/software/anaconda3/2020.07/bin/python
-#SBATCH -p action 
+#!/usr/bin/env python
 #SBATCH -o output.log
-#SBATCH --mem-per-cpu=1GB
 #SBATCH -t 1:00:00
-#SBATCH -N 1
-#SBATCH --ntasks-per-node=24
 ```
-Then submit the job on your HPCC as:
+Please dont add lines like "#SBATCH -N 1" or 
+"#SBATCH --ntasks-per-node=24" in the preamble as they are declared in the input file. 
+
+
+The output file containing population dynamics is 'method-methodOption-modelName.txt', for the above input file it would be: 
+
+_pldm-focused-tully2.txt_
+
+### Step 4 
+
+Run the this code with python3. 
+
 ```
-sbatch parallel.py whateverInput.txt folderName
+python3 run.py
 ```
-'whateverInput.txt' is the input file (described above) and 'folderName' is the folder where the output will be saved. The output file containing population dynamics is 'method.methodOption.modelName'.
 
 #### **Running using a multiple nodes.**
 _____________

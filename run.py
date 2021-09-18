@@ -99,6 +99,12 @@ else:
     except:
         pass
     print(f"Ignoring {ignoreList} in {inputfile}")
+    model = getInput(input,"Model")
+    exec(f"from {model} import parameters")
+    ntraj = parameters.NTraj 
+    print("-"*50)
+    print(f"Total Number of Trajectories = {ntraj}")
+    print("-"*50)
     os.system(f"python3 serial.py {inputfile}")
 
 

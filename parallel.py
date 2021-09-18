@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #SBATCH -o output.log
-
+#SBATCH -t 1:00:00
 
 import sys, os
 sys.path.append(os.popen("pwd").read().replace("\n","")+"/Method")
