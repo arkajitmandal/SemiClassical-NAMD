@@ -76,7 +76,7 @@ def initR():
 You can find several examples of model files inside the "Model" folder. I will explain each parts of this file in more detain in a section below.
 
 
-### Step 3 (simple)
+### Step 3 (simple | serial)
 Prepare an input file (name it : 'whateverInput.txt'):
 ```
 Model                = tully2
@@ -98,7 +98,7 @@ The output file containing population dynamics is 'method-methodOption-modelName
 
 _pldm-focused-tully2.txt_
 
-### Step 3 (for slurm on HPCC) 
+### Step 3 (advanced | parallel jobs; slurm on HPCC) 
 Prepare an input file (name it : 'whateverInput.txt') for slurm submission in your computing cluster:
 ```
 Model                = tully2
@@ -143,7 +143,7 @@ python3 run.py
 A molecular Hamiltonian in the diabatic representation is written as:
 ![Hm](eqns/Hm.svg)
 
-where __P<sub>k</sub>__ is the momentum for the __k__ th nuclear degrees of freedom with mass __M<sub>k</sub>__. Further, __V<sub>0</sub>(\{R<sub>k</sub>})__  and  __V<sub>ij</sub>(\{R<sub>k</sub>})__ are the state-independent and state-dependent part of the electronic Hamiltonian __H<sub>el</sub>(\{R<sub>k</sub>})__ in the diabatic basis {|i⟩}. That is:  __⟨i| Ĥ - ∑<sub>k</sub> P<sup>2</sup><sub>k</sub>/2M<sub>k</sub> |j⟩ = V<sub>ij</sub>(\{R<sub>k</sub>}) + V<sub>0</sub>(\{R<sub>k</sub>})δ<sub>ij</sub>__ .
+where __P<sub>k</sub>__ is the momentum for the __k__ th nuclear degrees of freedom with mass __M<sub>k</sub>__. Further, __V<sub>0</sub>(\{R<sub>k</sub>})__  and  __V<sub>ij</sub>(\{R<sub>k</sub>})__ are the state-independent and state-dependent part of the electronic Hamiltonian __H<sub>el</sub>(\{R<sub>k</sub>})__ in the diabatic basis __{|i⟩}__. That is:  __⟨i| Ĥ - ∑<sub>k</sub> P<sup>2</sup><sub>k</sub>/2M<sub>k</sub> |j⟩ = V<sub>ij</sub>(\{R<sub>k</sub>}) + V<sub>0</sub>(\{R<sub>k</sub>})δ<sub>ij</sub>__ .
 
 _____________
 _to be continued_...
