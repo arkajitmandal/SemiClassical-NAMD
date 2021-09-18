@@ -88,8 +88,8 @@ Method               = pldm-focused
   - mfe : Mean-Field Ehrenfest Approach. Kind of worst approach you can think of.
    - pldm-focused : Partial Linearized Density Matrix with focused initial conditions. Should be similar to mfe. Maybe slightly better. 
    - pldm-sampled : Partial Linearized Density Matrix (PLDM) with sampled initial conditions or the original PLDM approach. Most of the time works well, sometimes does not. Very good if your potentials are Hermonic (like Spin-Boson systems)
-   - spinpldm-all: The Spin-Mapping PLDM approach with full sampling. Often better than PLDM. Reliable but slighly slow. If your initial electronic state is a pure state $| i \rangle \langle i|$ (you could start from a super position state, but you have to hack into this code to do that) use spinpldm-half to get the same result but much faster (by half).
-   - spinpldm-half: The Spin-Mapping PLDM approach, but with our in-house approximation. Works perfectly if starting with an initial electronic state that is a pure state $| i \rangle \langle i|$ (you could start from a super position state, but you have to hack into this code to do that). 
+   - spinpldm-all: The Spin-Mapping PLDM approach with full sampling. Often better than PLDM. Reliable but slighly slow. If your initial electronic state is a pure state |i⟩⟨i| (you could start from a super position state, but you have to hack into this code to do that) use spinpldm-half to get the same result but much faster (by half).
+   - spinpldm-half: The Spin-Mapping PLDM approach, but with our in-house approximation. Works perfectly if starting with an initial electronic state that is a pure state |i⟩⟨i| (you could start from a super position state, but you have to hack into this code to do that). 
    - spinpldm-focused: The Spin-Mapping PLDM approach, approximated. Good for short-time calculation and to get a general trend for longer time. 
 
 The output file containing population dynamics is 'method-methodOption-modelName.txt', for the above input file it would be: 
