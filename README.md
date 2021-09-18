@@ -142,12 +142,14 @@ python3 run.py
 In all of the approaches coded up here, the nuclear DOF __{R,P}__ are evolved classically (their equation motion evolves under a classical like force) and the electronic DOF are described with the diabatic electronic states __{|i⟩}__.  
 
 A molecular Hamiltonian in the diabatic representation is written as:
+
 ![Hm](eqns/Hm.svg)
 
 where __P<sub>k</sub>__ is the momentum for the __k__ th nuclear degrees of freedom with mass __M<sub>k</sub>__. Further, __V<sub>0</sub>(\{R<sub>k</sub>})__  and  __V<sub>ij</sub>(\{R<sub>k</sub>})__ are the state-independent and state-dependent part of the electronic Hamiltonian __H<sub>el</sub>(\{R<sub>k</sub>})__ in the diabatic basis __{|i⟩}__. That is:  __⟨i| Ĥ - ∑<sub>k</sub> P<sup>2</sup><sub>k</sub>/2M<sub>k</sub> |j⟩ = V<sub>ij</sub>({R<sub>k</sub>}) + V<sub>0</sub>(\{R<sub>k</sub>})δ<sub>ij</sub>__. Of course most of times, we wave our hands, and make up models that describe __V<sub>ij</sub>({R<sub>k</sub>})__ with some analytical functions of __{R<sub>k</sub>}__. If you know the analytical form of __V<sub>ij</sub>({R<sub>k</sub>})__ you can write a model file: modelName.py. 
 
 
 One can always, set __V<sub>0</sub>(\{R<sub>k</sub>})__ = 0, and instead redefine __V<sub>ij</sub>(\{R<sub>k</sub>}) ⟶ V<sub>ij</sub>(\{R<sub>k</sub>}) + V<sub>0</sub>(\{R<sub>k</sub>})δ<sub>ij</sub>__ and they should be equivalent in principle. However, some of the semiclassical approaches (**pldm-sampled**, **sqc-square** and **sqc-triangle**) produce results that depend on how one separates the state-independent and state-dependent parts of the gradient of the electronic Hamiltonian. This is because, this separation provides state dependent and independent gradients : __∇<sub>k</sub>V<sub>0</sub>(\{R<sub>k</sub>})__  and __∇<sub>k</sub>V<sub>ij</sub>(\{R<sub>k</sub>})__ which will provide different forces on nuclear particle for different choices of separations in some of these approximate quantum dynamics approaches. The nuclear forces computed in all of these approaches assumes this general form:
+
 ![Hm](eqns/Force.svg)
 where Λ<sub>ij</sub> vaguely resembles the electornic density matrix elements. For example, in MFE, Λ<sub>ij</sub> = c<sub>i</sub>*c<sub>j</sub>.  For methods that have ∑<sub>i</sub>Λ<sub>ii</sub> = 1 (like MFE) for individual trajectories this separation of state-dependent and independent does not matter. For other's as I said before, it does. In my experience, the more you can put in the independent part the better. 
 
@@ -156,9 +158,11 @@ When such separation is not aparent, one can separate state-independent and stat
 ![Hm](eqns/Hm2.svg)
 
 One can define a state-independent part as:
+
 ![Hm](eqns/Hm3.svg)
 
 and consequently the new state-dependent part  (with matrix elements __V'<sub>ij</sub>(\{R<sub>k</sub>})__ ) becomes:
+
 ![Hm](eqns/Hm4.svg)
 
 With this choice one gets the following state dependent and independent part of gradients: __∇<sub>k</sub>V<sub>0</sub>(\{R<sub>k</sub>})__  and __∇<sub>k</sub>V'<sub>ij</sub>(\{R<sub>k</sub>})__.
