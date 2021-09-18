@@ -68,15 +68,28 @@ par.stype = stype
 rho_sum  = method.runTraj(par)
 #--------------------------------------- 
 
-
 PiiFile = open(f"{fold}/{method_[0]}-{method_[1]}-{model_}.txt","w") 
 NTraj = model.parameters().NTraj
-for t in range(rho_sum.shape[-1]):
-    PiiFile.write(f"{t * model.parameters.nskip * model.parameters.dtN} \t")
-    for i in range(NStates):
-        PiiFile.write(str(rho_sum[i,i,t].real / ( NTraj ) ) + "\t")
-    PiiFile.write("\n")
-PiiFile.close()
+
+if (method_[0] == 'sqc'):
+    for t in range(rho_sum.shape[-1]):
+        PiiFile.write(f"{t * model.parameters.nskip * model.parameters.dtN} \t")
+        norm = 0
+        for i in range(NStates):
+            norm += rho_sum[i,i,t].real
+        for i in range(NStates):
+            PiiFile.write(str(rho_sum[i,i,t].real / ( norm ) ) + "\t")
+        PiiFile.write("\n")
+    PiiFile.close()
+else:
+    for t in range(rho_sum.shape[-1]):
+        PiiFile.write(f"{t * model.parameters.nskip * model.parameters.dtN} \t")
+        for i in range(NStates):
+            PiiFile.write(str(rho_sum[i,i,t].real / ( NTraj ) ) + "\t")
+        PiiFile.write("\n")
+    PiiFile.close()
+
+
 t2 = time.time()-t1
 print(f"Total Time: {t2}")
 print(f"Time per trajectory: {t2/ntraj}")

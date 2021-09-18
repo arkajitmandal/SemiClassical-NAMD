@@ -3,6 +3,7 @@
 #SBATCH -t 1:00:00
 
 import sys, os
+
 sys.path.append(os.popen("pwd").read().replace("\n","")+"/Method")
 sys.path.append(os.popen("pwd").read().replace("\n","")+"/Model")
 #-------------------------
@@ -12,7 +13,6 @@ try:
 except:
     print("Reading input.txt")
     input = open('input.txt', 'r').readlines()
-
 
 def getInput(input,key):
     txt = [i for i in input if i.find(key)!=-1][0].split("=")[1].split("#", 1)[0].replace("\n","")

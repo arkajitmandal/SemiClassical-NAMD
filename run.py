@@ -63,9 +63,10 @@ if system == "slurm":
 
         partition = getInput(input,"Partition")
         
-
+        method   = getInput(input,"Method")
         options = f"--partition {partition} \
                     --ntasks-per-node {ncpus}\
+                    --job-name={model}-{method}\
                     --open-mode=append"
 
         ids.append(sbatch("parallel.py", f"{inputfile} RUN/run-{i}", options)) 
@@ -75,7 +76,7 @@ if system == "slurm":
     # Gather and average
     jobs = ":".join(ids)
     pre = f"--dependency=afterok:{jobs} --partition {partition} --output=output.log --open-mode=append"
-    sbatch("avg.py", "", pre)
+    sbatch("avg.py", inputfile, pre)
     
 # PC
 else:
