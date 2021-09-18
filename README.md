@@ -137,13 +137,15 @@ If your inputfile is named 'input.txt' then you could also just run,
 ```
 python3 run.py
 ```
-_____________
-_to be continued_...
-<!---
+
 # More details into Model
 
 A molecular Hamiltonian in the diabatic representation is written as:
+![Hm](eqns/Hm.svg)
 
+_____________
+_to be continued_...
+<!---
 $\hat{H} = \sum_{k}{{P}^{2}_{k}\over 2M_{k}} + \sum_{i,j} V_{ij}(\{R_{k}\})|i\rangle \langle j|$ 
 
 where ${P}_{k}$ is the momentum for the $k$th nuclear degrees of freedom with mass $M_{k}$. Further, $V_{ij}(\{R_{k}\})$ are matrix elements of the electronic part of the total Hamiltonian $\hat{H}$ in the diabatic basis $\{|i\rangle \}$.  That is, $V_{ij}(\{R_{k}\}) = \langle i| \hat{H} - \sum_{k}{{P}^{2}_{k}\over 2M_{k}} |j\rangle$. Of course most of times, we wave our hands, and make up models that describe $V_{ij}(\{R_{k}\})$ with some functions. If you know the analytical form of $V_{ij}(\{R_{k}\})$ you can write a model file: whateverModelName.py. 

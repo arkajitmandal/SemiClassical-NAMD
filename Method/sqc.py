@@ -12,7 +12,7 @@ def initMapping(Nstates, initState = 0, stype = "square"):
     qF = np.zeros((Nstates))
     pF = np.zeros((Nstates))
     if (stype == "square" or stype == "□"):
-        γ = 0.366
+        γ = (np.sqrt(3.0) -1)/2
         η = 2 * γ * ℜ(Nstates)  
         θ = 2 * π * ℜ(Nstates)
 
@@ -169,7 +169,7 @@ def runTraj(parameters):
         # Call function to initialize mapping variables
         dat.qF, dat.pF = initMapping(NStates, initState, stype) 
         if stype == "square" or stype == "□":
-            dat.γ = 0.366
+            dat.γ = (np.sqrt(3.0) - 1.0)/2.0
             pop = popSquare
         if stype == "triangle" or stype == "Δ":
             dat.γ = 1/3.0 
