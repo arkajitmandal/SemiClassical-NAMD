@@ -143,12 +143,12 @@ python3 run.py
 A molecular Hamiltonian in the diabatic representation is written as:
 ![Hm](eqns/Hm.svg)
 
+where _P<sub>k</sub>_ is the momentum for the _k_ th nuclear degrees of freedom with mass _M<sub>k</sub>_. Further, _V<sub>0</sub>(\{R<sub>k</sub>})_  and  _V<sub>ij</sub>(\{R<sub>k</sub>})_ are the state-independent and state-dependent part of the electronic Hamiltonian _H<sub>el</sub>(\{R<sub>k</sub>})_ in the diabatic basis {|i⟩}. That is:  _⟨i| Ĥ - ∑<sub>k</sub> P<sup>2</sup><sub>k</sub>/2M<sub>k</sub> |j⟩ = V<sub>ij</sub>(\{R<sub>k</sub>}) + V<sub>0</sub>(\{R<sub>k</sub>})δ<sub>ij</sub>_ .
+
 _____________
 _to be continued_...
 <!---
-$\hat{H} = \sum_{k}{{P}^{2}_{k}\over 2M_{k}} + \sum_{i,j} V_{ij}(\{R_{k}\})|i\rangle \langle j|$ 
-
-where ${P}_{k}$ is the momentum for the $k$th nuclear degrees of freedom with mass $M_{k}$. Further, $V_{ij}(\{R_{k}\})$ are matrix elements of the electronic part of the total Hamiltonian $\hat{H}$ in the diabatic basis $\{|i\rangle \}$.  That is, $V_{ij}(\{R_{k}\}) = \langle i| \hat{H} - \sum_{k}{{P}^{2}_{k}\over 2M_{k}} |j\rangle$. Of course most of times, we wave our hands, and make up models that describe $V_{ij}(\{R_{k}\})$ with some functions. If you know the analytical form of $V_{ij}(\{R_{k}\})$ you can write a model file: whateverModelName.py. 
+That is, $V_{ij}(\{R_{k}\}) = \langle i| \hat{H} - \sum_{k}{{P}^{2}_{k}\over 2M_{k}} |j\rangle$. Of course most of times, we wave our hands, and make up models that describe $V_{ij}(\{R_{k}\})$ with some functions. If you know the analytical form of $V_{ij}(\{R_{k}\})$ you can write a model file: whateverModelName.py. 
 
 
 For example consider a 1D dimentional model system, called the Tully's Model II. It has two electronic states and one nuclear DOF. Thus we write the Hamiltonian with one set of  $\{R,P\}$. _to be continued_...
