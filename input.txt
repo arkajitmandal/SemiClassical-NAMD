@@ -1,2 +1,7 @@
 Model                = tully2
-Method               = pldm-focused 
+Method               = pldm-sampled
+
+System               = pc
+Nodes                = 2
+Cpus                 = 24
+Partition            = action    

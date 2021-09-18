@@ -27,7 +27,6 @@ try:
 except:
     stype = "_"
 #-------------------------
-from multiprocessing import Pool
 import time 
 import numpy as np
 
@@ -40,58 +39,42 @@ try:
     
 except:
     fold = "."
-print (f"Folder: {fold}")
+
 #------------------------------------------------------------------------------------------
-try:
-    procs = int(getInput(input,"Cpus"))
-except:
-    procs = 1
-ntraj = procs * trajs
+procs = 1
+ntraj = trajs
 #------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------
 
 t1 = time.time()
-with Pool(procs) as p:
 
-    NSteps = model.parameters.NSteps
-    NTraj = model.parameters.NTraj
-    NStates = model.parameters.NStates
 
-    #------ Arguments for each CPU------------------
-    args = []
-    for j in range(procs):
-        par = model.parameters() 
-        par.ID   = j
-        par.SEED   = np.random.randint(0,100000000)
-        
-        #---- methods in model ------
+NSteps = model.parameters.NSteps
+NTraj = model.parameters.NTraj
+NStates = model.parameters.NStates
 
-        par.dHel = model.dHel
-        par.dHel0 = model.dHel0
-        par.initR = model.initR
-        par.Hel   = model.Hel
-        par.stype = stype
-        args.append(par)
-    #-----------------------------------------------
-    print(f"Running : {par.NTraj*procs}  trajectories in {procs} cpu" )
-
-    #------------------- parallelization -----------------------------------
-    rho_ensemble  = p.map(method.runTraj, args)
-    #-----------------------------------------------------------------------
-
-#------------------- Gather --------------------------------------------
-rho_sum = np.zeros(rho_ensemble[0].shape, dtype = rho_ensemble[0].dtype)
-for i in range(procs):
-    for t in range(rho_ensemble[0].shape[-1]):
-        rho_sum[:,:,t] += rho_ensemble[i][:,:,t]
+#------ Arguments------------------
+par = model.parameters() 
+par.ID     = np.random.randint(0,100)
+par.SEED   = np.random.randint(0,100000000)
+    
+#---- methods in model ------
+par.dHel = model.dHel
+par.dHel0 = model.dHel0
+par.initR = model.initR
+par.Hel   = model.Hel
+par.stype = stype
+#------------------- run --------------- 
+rho_sum  = method.runTraj(par)
+#--------------------------------------- 
 
 
 PiiFile = open(f"{fold}/{method_[0]}-{method_[1]}-{model_}.txt","w") 
 NTraj = model.parameters().NTraj
-for t in range(rho_ensemble[0].shape[-1]):
+for t in range(rho_sum.shape[-1]):
     PiiFile.write(f"{t * model.parameters.nskip * model.parameters.dtN} \t")
     for i in range(NStates):
-        PiiFile.write(str(rho_sum[i,i,t].real / (  procs * NTraj ) ) + "\t")
+        PiiFile.write(str(rho_sum[i,i,t].real / ( NTraj ) ) + "\t")
     PiiFile.write("\n")
 PiiFile.close()
 t2 = time.time()-t1

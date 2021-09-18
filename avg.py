@@ -1,6 +1,8 @@
+#!/usr/bin/env python
 import sys
 import numpy as np
 from glob import glob
+print("-"*50)
 
 try:
     filename = sys.argv[1]
@@ -19,10 +21,7 @@ except:
         print("No outputs found!")
         
 for filename in filenames:
-
-    
-    outName = filename
-
+    outName = filename 
 
     dirs = [f"RUN/run-{i}" for i in  range(fold)]
 
@@ -30,3 +29,5 @@ for filename in filenames:
     for i in range(1, fold):
         dat += np.loadtxt(dirs[i]+"/"+filename)
     np.savetxt(outName,dat/fold )
+
+print ("Gathered all data, feel free to remove the folder 'RUN'")
