@@ -138,12 +138,17 @@ If your inputfile is named 'input.txt' then you could also just run,
 python3 run.py
 ```
 
-# More details into Model
+# More details into Model Hamiltonian
 
 A molecular Hamiltonian in the diabatic representation is written as:
 ![Hm](eqns/Hm.svg)
 
 where __P<sub>k</sub>__ is the momentum for the __k__ th nuclear degrees of freedom with mass __M<sub>k</sub>__. Further, __V<sub>0</sub>(\{R<sub>k</sub>})__  and  __V<sub>ij</sub>(\{R<sub>k</sub>})__ are the state-independent and state-dependent part of the electronic Hamiltonian __H<sub>el</sub>(\{R<sub>k</sub>})__ in the diabatic basis __{|i⟩}__. That is:  __⟨i| Ĥ - ∑<sub>k</sub> P<sup>2</sup><sub>k</sub>/2M<sub>k</sub> |j⟩ = V<sub>ij</sub>(\{R<sub>k</sub>}) + V<sub>0</sub>(\{R<sub>k</sub>})δ<sub>ij</sub>__ .
+
+One can always, set __V<sub>0</sub>__ = 0, and instead redefine __V<sub>ij</sub>(\{R<sub>k</sub>}) ⟶ V<sub>ij</sub>(\{R<sub>k</sub>}) + V<sub>0</sub>(\{R<sub>k</sub>})δ<sub>ij</sub>__ and they should be equivalent in principle. However, some of the semiclassical approaches (**pldm-sampled**, **sqc-square** and **sqc-triangle**) produce results that depend on how one separates the state-independent and state-dependent parts of an electronic Hamiltonian. When such separation is not aparent, one can separate state-independent and state-dependent parts in the following manner.
+
+
+
 
 _____________
 _to be continued_...
