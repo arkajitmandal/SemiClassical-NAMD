@@ -93,6 +93,8 @@ Method               = pldm-focused
    - **spinpldm-focused**: The Spin-Mapping PLDM approach, approximated. Good for short-time calculation and to get a general trend for longer time. 
    - **sqc-square**: The Symmetric Quasi-Classical Approach [3], with square window. Better than MFE. Cannot use it for more than several electronic states.  
    - **sqc-triangle**: The Symmetric Quasi-Classical Approach [4], with triangle window. Better than sqc-square.   
+   - **zpesqc-triangle**: The zero-point energy corrected Symmetric Quasi-Classical Approach [5], with triangle window. As good as spin-PLDM or better.  
+   - **zpesqc-square**: The zero-point energy corrected Symmetric Quasi-Classical Approach [5], with square window. Slightly worse than zpesqc-triangle. 
 
 The output file containing population dynamics is 'method-methodOption-modelName.txt', for the above input file it would be: 
 
@@ -191,13 +193,17 @@ _to be continued_...
 <!--- 
 
 For example consider a 1D dimentional model system, called the Tully's Model II. It has two electronic states and one nuclear DOF. Thus we write the Hamiltonian with one set of  $\{R,P\}$. _to be continued_...
+
+[6] Braden, Mandal and Huo __J. Chem. Phys. 155, 084106__
 -->
 ## References
 _____________
 [1] Huo and Coker __J. Chem. Phys. 135, 201101 (2011)__\
 [2] Mannouch and Richardson __J. Chem. Phys. 153, 194109 (2020)__\
 [3] Cotton and Miller __J. Chem. Phys. 139, 234112 (2013)__\
-[4] Cotton and Miller __J. Chem. Phys. 145, 144108 (2016)__
+[4] Cotton and Miller __J. Chem. Phys. 145, 144108 (2016)__\
+[5] Cotton and Miller __J. Chem. Phys. 150, 194110 (2019)__
+
 
 
 email: arkajitmandal@gmail.com
