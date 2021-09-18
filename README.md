@@ -128,10 +128,13 @@ _pldm-focused-tully2.txt_
 Run the this code with python3. 
 
 ```
+python3 run.py whateverInput.txt
+```
+Where 'whateverInput.txt' is the input file described above.
+If your inputfile is named 'input.txt' then you could also just run,
+```
 python3 run.py
 ```
-
-#### **Running using a multiple nodes.**
 _____________
 _to be continued_...
 <!---
