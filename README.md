@@ -8,9 +8,9 @@ Create a folder and git clone this repository.
 git clone https://github.com/arkajitmandal/SemiClassical-NAMD
 ```
 ### Step 2
-Code up the model system in a python file inside the "Model" folder and name it  'whateverModelName.py'.  
+Code up the model system in a python file inside the "Model" folder and name it  'modelName.py'.  
 
-The 'whateverModelName.py' should look like:
+The 'modelName.py' should look like:
 ```py
 import numpy as np
 
@@ -83,7 +83,7 @@ Model                = tully2
 Method               = pldm-focused 
 ```
 
-* Model : The right hand side of the first line, _tully2_, tells the code to look for tully2.py inside the folder "Model". If you name your model file as  whateverModelName.py then you should write 'Model = whateverModelName' (without the '.py' part). 
+* Model : The right hand side of the first line, _tully2_, tells the code to look for tully2.py inside the folder "Model". If you name your model file as  modelName.py then you should write 'Model = modelName' (without the '.py' part). 
 * Method : Written as, method.methodOption. Select a quantum dynamics method. The available methods are :
   - **mfe** : Mean-Field Ehrenfest Approach. Kind of worst approach you can think of.
    - **pldm-focused** : Partial Linearized Density Matrix (PLDM) [1] with focused initial conditions. Should be similar to mfe. Maybe slightly better. 
@@ -138,26 +138,52 @@ If your inputfile is named 'input.txt' then you could also just run,
 python3 run.py
 ```
 
-# More details into Model Hamiltonian
+# Details of Model Hamiltonian
 In all of the approaches coded up here, the nuclear DOF __{R,P}__ are evolved classically (their equation motion evolves under a classical like force) and the electronic DOF are described with the diabatic electronic states __{|i⟩}__.  
 
 A molecular Hamiltonian in the diabatic representation is written as:
 ![Hm](eqns/Hm.svg)
 
-where __P<sub>k</sub>__ is the momentum for the __k__ th nuclear degrees of freedom with mass __M<sub>k</sub>__. Further, __V<sub>0</sub>(\{R<sub>k</sub>})__  and  __V<sub>ij</sub>(\{R<sub>k</sub>})__ are the state-independent and state-dependent part of the electronic Hamiltonian __H<sub>el</sub>(\{R<sub>k</sub>})__ in the diabatic basis __{|i⟩}__. That is:  __⟨i| Ĥ - ∑<sub>k</sub> P<sup>2</sup><sub>k</sub>/2M<sub>k</sub> |j⟩ = V<sub>ij</sub>({R<sub>k</sub>}) + V<sub>0</sub>(\{R<sub>k</sub>})δ<sub>ij</sub>__. Of course most of times, we wave our hands, and make up models that describe __V<sub>ij</sub>({R<sub>k</sub>})__ with some analytical functions of __{R<sub>k</sub>}__. If you know the analytical form of __V<sub>ij</sub>({R<sub>k</sub>})__ you can write a model file: whateverModelName.py. 
+where __P<sub>k</sub>__ is the momentum for the __k__ th nuclear degrees of freedom with mass __M<sub>k</sub>__. Further, __V<sub>0</sub>(\{R<sub>k</sub>})__  and  __V<sub>ij</sub>(\{R<sub>k</sub>})__ are the state-independent and state-dependent part of the electronic Hamiltonian __H<sub>el</sub>(\{R<sub>k</sub>})__ in the diabatic basis __{|i⟩}__. That is:  __⟨i| Ĥ - ∑<sub>k</sub> P<sup>2</sup><sub>k</sub>/2M<sub>k</sub> |j⟩ = V<sub>ij</sub>({R<sub>k</sub>}) + V<sub>0</sub>(\{R<sub>k</sub>})δ<sub>ij</sub>__. Of course most of times, we wave our hands, and make up models that describe __V<sub>ij</sub>({R<sub>k</sub>})__ with some analytical functions of __{R<sub>k</sub>}__. If you know the analytical form of __V<sub>ij</sub>({R<sub>k</sub>})__ you can write a model file: modelName.py. 
 
 
-One can always, set __V<sub>0</sub>__ = 0, and instead redefine __V<sub>ij</sub>(\{R<sub>k</sub>}) ⟶ V<sub>ij</sub>(\{R<sub>k</sub>}) + V<sub>0</sub>(\{R<sub>k</sub>})δ<sub>ij</sub>__ and they should be equivalent in principle. However, some of the semiclassical approaches (**pldm-sampled**, **sqc-square** and **sqc-triangle**) produce results that depend on how one separates the state-independent and state-dependent parts of an electronic Hamiltonian. When such separation is not aparent, one can separate state-independent and state-dependent parts in the following manner.
+One can always, set __V<sub>0</sub>(\{R<sub>k</sub>})__ = 0, and instead redefine __V<sub>ij</sub>(\{R<sub>k</sub>}) ⟶ V<sub>ij</sub>(\{R<sub>k</sub>}) + V<sub>0</sub>(\{R<sub>k</sub>})δ<sub>ij</sub>__ and they should be equivalent in principle. However, some of the semiclassical approaches (**pldm-sampled**, **sqc-square** and **sqc-triangle**) produce results that depend on how one separates the state-independent and state-dependent parts of the gradient of the electronic Hamiltonian. This is because, this separation provides state dependent and independent gradients : __∇<sub>k</sub>V<sub>0</sub>(\{R<sub>k</sub>})__  and __∇<sub>k</sub>V<sub>ij</sub>(\{R<sub>k</sub>})__ which will provide different forces on nuclear particle for different choices of separations in some of these approximate quantum dynamics approaches. The nuclear forces computed in all of these approaches assumes this general form:
+![Hm](eqns/Force.svg)
+where Λ<sub>ij</sub> vaguely resembles the electornic density matrix elements. For example, in MFE, Λ<sub>ij</sub> = c<sub>i</sub>*c<sub>j</sub>.  For methods that have ∑<sub>i</sub>Λ<sub>ii</sub> = 1 (like MFE) for individual trajectories this separation of state-dependent and independent does not matter. For other's as I said before, it does. In my experience, the more you can put in the independent part the better. 
+
+When such separation is not aparent, one can separate state-independent and state-dependent parts in the following manner. Consider the following molecular Hamiltonian with no aparent state-independent part of the electronic Hamiltonian:
+
+![Hm](eqns/Hm2.svg)
+
+One can define a state-independent part as:
+![Hm](eqns/Hm3.svg)
+
+and consequently the new state-dependent part  (with matrix elements __V'<sub>ij</sub>(\{R<sub>k</sub>})__ ) becomes:
+![Hm](eqns/Hm4.svg)
+
+With this choice one gets the following state dependent and independent part of gradients: __∇<sub>k</sub>V<sub>0</sub>(\{R<sub>k</sub>})__  and __∇<sub>k</sub>V'<sub>ij</sub>(\{R<sub>k</sub>})__.
 
 
+## Details of a model file ('modelName.py')
+
+### Hel(R)
+In the Hel(R) function inside the 'modelName.py' one have to define NxN matrix elements of the state-dependent electronic part of the Hamiltonian. Here you will code up  __V<sub>ij</sub>(\{R<sub>k</sub>})__.
+
+### dHel(R)
+In the dHel(R) function inside the 'modelName.py' one have to define NxNxNR matrix elements of the state-dependent gradient electronic part of the Hamiltonian. Here you will code up  __∇<sub>k</sub>V<sub>ij</sub>(\{R<sub>k</sub>})__.
+
+### dHel0(R)
+In the dHel0(R) function inside the 'modelName.py' one have to define a array of length NR describing the state-independent gradient of electronic part of the Hamiltonian. Here you will code up  __∇<sub>k</sub>V<sub>0</sub>(\{R<sub>k</sub>})__.
 
 
+**_NOTE:_** You dont need to code up __V<sub>0</sub>(\{R<sub>k</sub>})__ as such a zero-point energy shift does not affect dynamics. 
+
+### initR()
+Sample R, P from a wigner distribution. 
 
 _____________
 _to be continued_...
-<!---
-That is, $V_{ij}(\{R_{k}\}) = \langle i| \hat{H} - \sum_{k}{{P}^{2}_{k}\over 2M_{k}} |j\rangle$. Of course most of times, we wave our hands, and make up models that describe $V_{ij}(\{R_{k}\})$ with some functions. If you know the analytical form of $V_{ij}(\{R_{k}\})$ you can write a model file: whateverModelName.py. 
-
+<!--- 
 
 For example consider a 1D dimentional model system, called the Tully's Model II. It has two electronic states and one nuclear DOF. Thus we write the Hamiltonian with one set of  $\{R,P\}$. _to be continued_...
 -->

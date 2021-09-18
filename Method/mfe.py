@@ -1,9 +1,5 @@
 import numpy as np
-import sys, os 
-sys.path.append(os.popen("pwd").read().replace("\n",""))
-sys.path.append(os.popen("pwd").read().replace("\n","")+"/Model")
 
-import random
 
 class Bunch:
     def __init__(self, **kwds):

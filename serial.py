@@ -68,7 +68,11 @@ par.stype = stype
 rho_sum  = method.runTraj(par)
 #--------------------------------------- 
 
-PiiFile = open(f"{fold}/{method_[0]}-{method_[1]}-{model_}.txt","w") 
+
+try:    
+    PiiFile = open(f"{fold}/{method_[0]}-{method_[1]}-{model_}.txt","w") 
+except:
+    PiiFile = open(f"{fold}/{method_[0]}-{model_}.txt","w") 
 NTraj = model.parameters().NTraj
 
 if (method_[0] == 'sqc'):

@@ -85,8 +85,11 @@ for i in range(procs):
     for t in range(rho_ensemble[0].shape[-1]):
         rho_sum[:,:,t] += rho_ensemble[i][:,:,t]
 
-
-PiiFile = open(f"{fold}/{method_[0]}-{method_[1]}-{model_}.txt","w") 
+try:    
+    PiiFile = open(f"{fold}/{method_[0]}-{method_[1]}-{model_}.txt","w") 
+except:
+    PiiFile = open(f"{fold}/{method_[0]}-{model_}.txt","w") 
+ 
 NTraj = model.parameters().NTraj
 for t in range(rho_ensemble[0].shape[-1]):
     PiiFile.write(f"{t * model.parameters.nskip * model.parameters.dtN} \t")
