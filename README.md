@@ -86,13 +86,13 @@ Method               = pldm-focused
 * Model : The right hand side of the first line, _tully2_, tells the code to look for tully2.py inside the folder "Model". If you name your model file as  whateverModelName.py then you should write 'Model = whateverModelName' (without the '.py' part). 
 * Method : Written as, method.methodOption. Select a quantum dynamics method. The available methods are :
   - **mfe** : Mean-Field Ehrenfest Approach. Kind of worst approach you can think of.
-   - **pldm-focused** : Partial Linearized Density Matrix with focused initial conditions. Should be similar to mfe. Maybe slightly better. 
-   - **pldm-sampled** : Partial Linearized Density Matrix (PLDM) with sampled initial conditions or the original PLDM approach. Most of the time works well, sometimes does not. Very good if your potentials are Hermonic (like Spin-Boson systems)
-   - **spinpldm-all**: The Spin-Mapping PLDM approach with full sampling. Often better than PLDM. Reliable but slighly slow. If your initial electronic state is a pure state |i⟩⟨i| (you could start from a super position state, but you have to hack into this code to do that) use spinpldm-half to get the same result but much faster (by half).
+   - **pldm-focused** : Partial Linearized Density Matrix (PLDM) [1] with focused initial conditions. Should be similar to mfe. Maybe slightly better. 
+   - **pldm-sampled** : Partial Linearized Density Matrix (PLDM) [1] with sampled initial conditions or the original PLDM approach. Most of the time works well, sometimes does not. Very good if your potentials are Hermonic (like Spin-Boson systems)
+   - **spinpldm-all**: The Spin-Mapping PLDM [2] approach with full sampling. Often better than PLDM. Reliable but slighly slow. If your initial electronic state is a pure state |i⟩⟨i| (you could start from a super position state, but you have to hack into this code to do that) use spinpldm-half to get the same result but much faster (by half).
    - **spinpldm-half**: The Spin-Mapping PLDM approach, but with our in-house approximation. Works perfectly if starting with an initial electronic state that is a pure state |i⟩⟨i| (you could start from a super position state, but you have to hack into this code to do that). 
    - **spinpldm-focused**: The Spin-Mapping PLDM approach, approximated. Good for short-time calculation and to get a general trend for longer time. 
-   - **sqc-square**: The Symmetric Quasi-Classical Approach, with square window. Better than MFE. Cannot use it for more than several electronic states.  
-   - **sqc-triangle**: The Symmetric Quasi-Classical Approach, with triangle window. Better than sqc-square.   
+   - **sqc-square**: The Symmetric Quasi-Classical Approach [3], with square window. Better than MFE. Cannot use it for more than several electronic states.  
+   - **sqc-triangle**: The Symmetric Quasi-Classical Approach [4], with triangle window. Better than sqc-square.   
 
 The output file containing population dynamics is 'method-methodOption-modelName.txt', for the above input file it would be: 
 
@@ -139,13 +139,16 @@ python3 run.py
 ```
 
 # More details into Model Hamiltonian
+In all of the approaches coded up here, the nuclear DOF __{R,P}__ are evolved classically (their equation motion evolves under a classical like force) and the electronic DOF are described with the diabatic electronic states __{|i⟩}__.  
 
 A molecular Hamiltonian in the diabatic representation is written as:
 ![Hm](eqns/Hm.svg)
 
-where __P<sub>k</sub>__ is the momentum for the __k__ th nuclear degrees of freedom with mass __M<sub>k</sub>__. Further, __V<sub>0</sub>(\{R<sub>k</sub>})__  and  __V<sub>ij</sub>(\{R<sub>k</sub>})__ are the state-independent and state-dependent part of the electronic Hamiltonian __H<sub>el</sub>(\{R<sub>k</sub>})__ in the diabatic basis __{|i⟩}__. That is:  __⟨i| Ĥ - ∑<sub>k</sub> P<sup>2</sup><sub>k</sub>/2M<sub>k</sub> |j⟩ = V<sub>ij</sub>(\{R<sub>k</sub>}) + V<sub>0</sub>(\{R<sub>k</sub>})δ<sub>ij</sub>__ .
+where __P<sub>k</sub>__ is the momentum for the __k__ th nuclear degrees of freedom with mass __M<sub>k</sub>__. Further, __V<sub>0</sub>(\{R<sub>k</sub>})__  and  __V<sub>ij</sub>(\{R<sub>k</sub>})__ are the state-independent and state-dependent part of the electronic Hamiltonian __H<sub>el</sub>(\{R<sub>k</sub>})__ in the diabatic basis __{|i⟩}__. That is:  __⟨i| Ĥ - ∑<sub>k</sub> P<sup>2</sup><sub>k</sub>/2M<sub>k</sub> |j⟩ = V<sub>ij</sub>({R<sub>k</sub>}) + V<sub>0</sub>(\{R<sub>k</sub>})δ<sub>ij</sub>__. Of course most of times, we wave our hands, and make up models that describe __V<sub>ij</sub>({R<sub>k</sub>})__ with some analytical functions of __{R<sub>k</sub>}__. If you know the analytical form of __V<sub>ij</sub>({R<sub>k</sub>})__ you can write a model file: whateverModelName.py. 
+
 
 One can always, set __V<sub>0</sub>__ = 0, and instead redefine __V<sub>ij</sub>(\{R<sub>k</sub>}) ⟶ V<sub>ij</sub>(\{R<sub>k</sub>}) + V<sub>0</sub>(\{R<sub>k</sub>})δ<sub>ij</sub>__ and they should be equivalent in principle. However, some of the semiclassical approaches (**pldm-sampled**, **sqc-square** and **sqc-triangle**) produce results that depend on how one separates the state-independent and state-dependent parts of an electronic Hamiltonian. When such separation is not aparent, one can separate state-independent and state-dependent parts in the following manner.
+
 
 
 
@@ -158,5 +161,12 @@ That is, $V_{ij}(\{R_{k}\}) = \langle i| \hat{H} - \sum_{k}{{P}^{2}_{k}\over 2M_
 
 For example consider a 1D dimentional model system, called the Tully's Model II. It has two electronic states and one nuclear DOF. Thus we write the Hamiltonian with one set of  $\{R,P\}$. _to be continued_...
 -->
+## References
+_____________
+[1] Huo and Coker __J. Chem. Phys. 135, 201101 (2011)__\
+[2] Mannouch and Richardson __J. Chem. Phys. 153, 194109 (2020)__\
+[3] Cotton and Miller __J. Chem. Phys. 139, 234112 (2013)__\
+[4] Cotton and Miller __J. Chem. Phys. 145, 144108 (2016)__
+
 
 email: arkajitmandal@gmail.com
