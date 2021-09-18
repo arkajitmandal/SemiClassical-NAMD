@@ -1,7 +1,7 @@
 Model                = tully2
 Method               = pldm-sampled
 
-System               = pc
+System               = slurm
 Nodes                = 2
 Cpus                 = 24
 Partition            = action    
