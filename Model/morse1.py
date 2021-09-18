@@ -7,7 +7,7 @@ class parameters():
    NSteps = 3000  
    NTraj = 50
    dtN = 1
-   dtE = dtN/40
+   dtE = dtN/100
    NStates = 3
    M = 20000
    initState = 0

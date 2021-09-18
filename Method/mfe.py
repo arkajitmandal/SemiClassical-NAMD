@@ -44,10 +44,11 @@ def VelVer(dat) :
     ci = dat.ci * 1.0
     
     EStep = int(par.dtN/par.dtE)
+    dtE = par.dtN/EStep
 
     # half electronic evolution
     for t in range(int(np.floor(EStep/2))):
-        ci = propagateCi(ci, dat.Hij, par.dtE)  
+        ci = propagateCi(ci, dat.Hij, dtE)  
     ci /= np.sum(ci.conjugate()*ci) 
     dat.ci = ci * 1.0 
 
@@ -66,7 +67,7 @@ def VelVer(dat) :
     # ======================================================
     # half electronic evolution
     for t in range(int(np.ceil(EStep/2))):
-        ci = propagateCi(ci, dat.Hij, par.dtE)  
+        ci = propagateCi(ci, dat.Hij, dtE)  
     ci /= np.sum(ci.conjugate()*ci)  
     dat.ci = ci * 1.0 
 

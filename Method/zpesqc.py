@@ -9,8 +9,10 @@ class Bunch:
 
 # Initialization of the mapping Variables
 def initMapping(Nstates, initState = 0, stype = "square"):
-    qF = np.zeros((Nstates))
-    pF = np.zeros((Nstates))
+    qF  = np.zeros((Nstates))
+    pF  = np.zeros((Nstates))
+    γ0  = np.zeros((Nstates)) # Adjusted ZPE
+
     if (stype == "square" or stype == "□"):
         γ = (np.sqrt(3.0) -1)/2
         η = 2 * γ * ℜ(Nstates)  
@@ -33,7 +35,11 @@ def initMapping(Nstates, initState = 0, stype = "square"):
     η[initState] += 1.0
     qF =  np.sqrt( 2 * η ) * np.cos(θ)
     pF = -np.sqrt( 2 * η ) * np.sin(θ)
-    return qF, pF 
+
+    for i in range(Nstates):
+        γ0[i] = η[i] - 1 * (i == initState)
+
+    return qF, pF, γ0
 
 def Umap(qF, pF, dt, VMat):
     qFin, pFin = qF * 1.0, pF * 1.0  # Store input position and momentum for verlet propogation
@@ -54,14 +60,14 @@ def Umap(qF, pF, dt, VMat):
     return qF, pF 
 
 def Force(dat):
-    γ = dat.γ
+    γ0 = dat.γ0
     dH = dat.dHij #dHel(R) Nxnxn Matrix, N = Nuclear DOF, n = NStates 
     dH0 = dat.dH0
     qF, pF =  dat.qF * 1.0, dat.pF * 1.0
     # F = np.zeros((len(dat.R)))
     F = -dH0
     for i in range(len(qF)):
-        F -= 0.5 * dH[i,i,:] * ( qF[i] ** 2 + pF[i] ** 2 - 2 * γ)
+        F -= 0.5 * dH[i,i,:] * ( qF[i] ** 2 + pF[i] ** 2 - 2 * γ0[i])
         for j in range(i+1, len(qF)):
             F -= dH[i,j,:] * ( qF[i] * qF[j] + pF[i] * pF[j])
     return F
@@ -74,7 +80,6 @@ def VelVer(dat) : # R, P, qF, qB, pF, pB, dtI, dtE, F1, Hij,M=1): # Ionic positi
     v = dat.P/par.M
     EStep = int(par.dtN/par.dtE)
     dtE = par.dtN/EStep
-    
     # half-step mapping
     for t in range(int(np.floor(EStep/2))):
         qF, pF = Umap(qF, pF, dtE, dat.Hij)
@@ -127,7 +132,6 @@ def popTriangle(dat):
     qF, pF = dat.qF * 1.0, dat.pF * 1.0 
     N = len(qF)
     η = 0.5 * ( qF**2 + pF**2 )
-    γ = dat.γ
     ρij = np.outer(qF + 1j * pF, qF - 1j * pF) * 0 # have to recheck coherences
     ρij[np.diag_indices(N)] = np.ones((N))
     # Inspired from Braden's (Braden Weight) Implementation
@@ -168,7 +172,7 @@ def runTraj(parameters):
         vv  = VelVer
 
         # Call function to initialize mapping variables
-        dat.qF, dat.pF = initMapping(NStates, initState, stype) 
+        dat.qF, dat.pF, dat.γ0 = initMapping(NStates, initState, stype) 
         if stype == "square" or stype == "□":
             dat.γ = (np.sqrt(3.0) - 1.0)/2.0
             pop = popSquare

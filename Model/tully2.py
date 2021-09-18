@@ -2,13 +2,13 @@ import numpy as np
 
 class parameters():
    NSteps = 600 #int(2*10**6)
-   NTraj = 100
+   NTraj = 50
    dtN = 2
    dtE = dtN/40
    NStates = 2
    M = 2000
    initState = 0
-   nskip = 5
+   nskip = 10
 
 def Hel(R):
     A = 0.1
