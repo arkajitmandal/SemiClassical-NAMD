@@ -252,3 +252,34 @@ def ring(param):
     return poly
 
 #==============================================================================
+#=========== free ring-polymer propagation ============================
+def freerp(P,R,param):
+
+    """
+    see Eq. 22 to 24 of Ceriotti, Parinello JCP 2010 
+
+    """
+    nb = param.nb
+    ndof = param.ndof
+
+    P_norm = np.zeros((ndof,nb)) #normal modes for momenta
+    Q_norm = np.zeros((ndof,nb)) #normal modes for position
+    poly = np.zeros((4,nb))
+
+    poly = ring(param)  # calling ring() function to obtain the polynomials
+
+    P_norm, Q_norm = nm_t(P,R,param) #normal mode obtained
+
+    for k in range(nb):
+        for j in range(ndof):
+            l=(k-int(nb/2))
+            
+            pjknew = P_norm[j,l]*poly[0,l] + Q_norm[j,l]*poly[1,l]
+            Q_norm[j,l] = P_norm[j,l]*poly[2,l] + Q_norm[j,l]*poly[3,l]
+            P_norm[j,l] = pjknew
+
+
+    P,R = back_nm_t(P_norm,Q_norm,param) # from normal mode to bead
+
+    return P,R
+#=======================================================================
