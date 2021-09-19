@@ -5,13 +5,14 @@ from numpy import diag_indices as Dii
 
 class parameters():
    NSteps = 3000  
-   NTraj = 50
+   NTraj = 1
    dtN = 1
    dtE = dtN/100
    NStates = 3
    M = 20000
    initState = 0
    nskip = 10
+   ndof = 1
    
 
 def Hel(R):

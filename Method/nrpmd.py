@@ -1,7 +1,8 @@
 import numpy as np
 import sys, os
 
-import random
+from numpy.random import random
+import math
 
 class Bunch:
     def __init__(self, **kwds):
@@ -12,12 +13,12 @@ class Bunch:
 def initMap(param):
     """
     initialize Mapping variables q and p
-    dimensionality q[nstate,nb] so do p
+    dimensionality q[NStates,nb] so do p
     """
-    q = np.zeros((param.nstate,param.nb))
-    p = np.zeros((param.nstate,param.nb))
+    q = np.zeros((param.NStates,param.nb))
+    p = np.zeros((param.NStates,param.nb))
     i0 = param.initState
-    for i in range(param.nstate):
+    for i in range(param.NStates):
        for ib in range(param.nb):
             η = np.sqrt(1 + 2*(i==i0))
             θ = random() * 2 * np.pi
@@ -291,7 +292,7 @@ def freerp(P,R,param):
 def vvMap(p,q,Hij,dtE):
     """
     Hel => function
-    q[nstate, nb]
+    q[NStates, nb]
     dqi/dt = dH/dpi   =  ∑_i Hij pj | dq/dt =  Hij @ p
     dpi/dt = - dH/dqi = -∑_i Hij qj | dp/dt = -Hij @ q  
     ℒ => ℒp dt/2 . ℒq dt . ℒp dt/2
@@ -323,7 +324,7 @@ def vvna(dat):
 
     """
     p,q = dat.p*1,dat.q*1
-    P,R = dat.P*1,dat*R*1
+    P,R = dat.P*1,dat.R*1
     param = dat.param
     Hel = param.Hel
     dHel = param.dHel
@@ -332,7 +333,7 @@ def vvna(dat):
     M = param.M
     dtN= param.dtN
     EStep = int(param.dtN/param.dtE)
-    dtE = par.dtN/EStep
+    dtE = param.dtN/EStep
 
 
     #---(ℒpx.dt/2)---------------
@@ -381,9 +382,9 @@ def pop(dat):
     
     param = dat.param
     nb = param.nb
-    nstate = param.nstate
+    NStates = param.NStates
     p,q = dat.p,dat.q
-    rho = np.zeros((nstate,nstate))
+    rho = np.zeros((NStates,NStates))
     
     for ib in range(nb):
         
@@ -409,7 +410,7 @@ def runTraj(parameters):
     nskip = parameters.nskip
     #----------ring-polymer parameters-----------------
 
-    if nb%2!=0:
+    if nb%2==0:
         nb = nb+1
         print(f"Note: using odd number of beads, {nb}")
     
@@ -441,8 +442,8 @@ def runTraj(parameters):
                
         # set propagator
         vv  = vvna
-
-        for isteps in range(NSteps):
+        iskip = 0 
+        for i in range(NSteps):
             
             dat = vv(dat)
                         
