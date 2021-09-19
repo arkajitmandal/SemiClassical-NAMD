@@ -70,6 +70,8 @@ with Pool(procs) as p:
         par.dHel0 = model.dHel0
         par.initR = model.initR
         par.Hel   = model.Hel
+        if method_[0]=="nrpmd":
+            par.initHel0 = model.initHel0
         par.stype = stype
         args.append(par)
     #-----------------------------------------------

@@ -435,11 +435,6 @@ def runTraj(parameters):
         P = initP(parameters)  # initialize P
         p,q = initMap(parameters) # initialize p,q
 
-
-        parameters.Hel = Hel
-        parameters.dHel = dHel 
-        parameters.dHel0 = dHel0 
-
         dat = Bunch(param =  parameters)
         dat.R, dat.P = R,P
         dat.q, dat.p = q,p
