@@ -7,20 +7,21 @@ class Bunch:
 
 # Initialization of the electronic part
 def initElectronic(Nstates, initState = 0):
-    #global qF, qB, pF, pB, qF0, qB0, pF0, pB0
     c = np.zeros((Nstates), dtype='complex128')
     c[initState] = 1.0
     return c
 
-def propagateCi(ci,Vij, dt):
-    c = ci * 1.0
+def Uqm(dat, dt):
+    c = dat.ci * 1.0
     # https://thomasbronzwaer.wordpress.com/2016/10/15/numerical-quantum-mechanics-the-time-dependent-schrodinger-equation-ii/
-    ck1 = (-1j) * (Vij @ c)
-    ck2 = (-1j) * (Vij @ c + (dt/2.0) * ck1 )
-    ck3 = (-1j) * (Vij @ c + (dt/2.0) * ck2 )
-    ck4 = (-1j) * (Vij @ c + (dt) * ck3 )
+    ck1 = (-1j) * (dat.Hij @ c)
+    ck2 = (-1j) * (dat.Hij @ c + (dt/2.0) * ck1 )
+    ck3 = (-1j) * (dat.Hij @ c + (dt/2.0) * ck2 )
+    ck4 = (-1j) * (dat.Hij @ c + (dt) * ck3 )
     c = c + (dt/6.0) * (ck1 + 2.0 * ck2 + 2.0 * ck3 + ck4)
-    return c
+    c /= np.sum(c.conjugate()*c) # renormalization
+    dat.ci = c
+    return dat
 
 def Force(dat):
 
@@ -35,43 +36,6 @@ def Force(dat):
         for j in range(i+1, len(ci)):
             F -= 2.0 * dH[i,j,:]  * (ci[i].conjugate() * ci[j] ).real
     return F
-
-def VelVer(dat) : 
-    par =  dat.param
-    v = dat.P/par.M
-    F1 = dat.F1 
-    # electronic wavefunction
-    ci = dat.ci * 1.0
-    
-    EStep = int(par.dtN/par.dtE)
-    dtE = par.dtN/EStep
-
-    # half electronic evolution
-    for t in range(int(np.floor(EStep/2))):
-        ci = propagateCi(ci, dat.Hij, dtE)  
-    ci /= np.sum(ci.conjugate()*ci) 
-    dat.ci = ci * 1.0 
-
-    # ======= Nuclear Block ==================================
-    dat.R += v * par.dtN + 0.5 * F1 * par.dtN ** 2 / par.M
-    
-    #------ Do QM ----------------
-    dat.Hij  = par.Hel(dat.R)
-    dat.dHij = par.dHel(dat.R)
-    dat.dH0  = par.dHel0(dat.R)
-    #-----------------------------
-    F2 = Force(dat) # force at t2
-    v += 0.5 * (F1 + F2) * par.dtN / par.M
-    dat.F1 = F2
-    dat.P = v * par.M
-    # ======================================================
-    # half electronic evolution
-    for t in range(int(np.ceil(EStep/2))):
-        ci = propagateCi(ci, dat.Hij, dtE)  
-    ci /= np.sum(ci.conjugate()*ci)  
-    dat.ci = ci * 1.0 
-
-    return dat
 
 
 def pop(dat):
@@ -104,7 +68,9 @@ def runTraj(parameters):
         dat.R, dat.P = parameters.initR()
         
         # set propagator
-        vv  = VelVer
+        dat.force = Force
+        dat.Uqm = Uqm
+        vv  = parameters.vv
 
         # Call function to initialize mapping variables
         dat.ci = initElectronic(NStates, initState) # np.array([0,1])
@@ -125,22 +91,3 @@ def runTraj(parameters):
             dat = vv(dat)
 
     return rho_ensemble
-
-if __name__ == "__main__": 
-    import spinBoson as model
-    par =  model.parameters
-    
-    rho_ensemble = runTraj(par)
-    
-    NSteps = model.parameters.NSteps
-    NTraj = model.parameters.NTraj
-    NStates = model.parameters.NStates
-
-    PiiFile = open("Pii.txt","w") 
-    for t in range(NSteps):
-        PiiFile.write(f"{t * model.parameters.nskip} \t")
-        for i in range(NStates):
-            PiiFile.write(str(rho_ensemble[i,i,t].real / NTraj) + "\t")
-        PiiFile.write("\n")
-    PiiFile.close()
-

@@ -86,55 +86,20 @@ def Force(dat):
             F -= 2 * 0.5 * dH[i,j,:] * η[i,j]
     return F
 
-def VelVer(dat) :
-
-    # data 
-    zF, zB = dat.zF * 1.0, dat.zB *  1.0 
-    par =  dat.param
-    v = dat.P/par.M
-    EStep = int(par.dtN/par.dtE)
-    dtE = par.dtN/EStep
-
-    # half-step mapping
-    for t in range(int(np.floor(EStep/2))):
-        zF = Umap(zF, dtE, dat.Hij)
-        zB = Umap(zB, dtE, dat.Hij)
-    dat.zF, dat.zB = zF * 1, zB * 1 
-
-    # ======= Nuclear Block ==================================
-    F1    =  Force(dat) # force with {qF(t+dt/2)} * dH(R(t))
-    dat.R += v * par.dtN + 0.5 * F1 * par.dtN ** 2 / par.M
-    
-    #------ Do QM ----------------
-    dat.Hij  = par.Hel(dat.R)
-    dat.dHij = par.dHel(dat.R)
-    dat.dH0  = par.dHel0(dat.R)
-    #-----------------------------
-    F2 = Force(dat) # force with {qF(t+dt/2)} * dH(R(t+ dt))
-    v += 0.5 * (F1 + F2) * par.dtN / par.M
-
-    dat.P = v * par.M
-    # =======================================================
-    
-    # half-step mapping
-    dat.Hij = par.Hel(dat.R) # do QM
-
-
-    for t in range(int(np.ceil(EStep/2))):
-        zF = Umap(zF, dtE, dat.Hij)
-        zB = Umap(zB, dtE, dat.Hij)
-    dat.zF, dat.zB = zF * 1, zB * 1 
-    
-
-    #---- Propagate Ugamma ----------
-    E, U = np.linalg.eigh(dat.Hij)
-    # Transform eigenvalues
-    Udt = U @  np.diag( np.exp( -1j * E * par.dtN) ) @ U.T  
-    dat.Ugam = Udt @ dat.Ugam 
-
+def Uqm(dat, dt):
+    zF, zB = dat.zF * 1.0, dat.zB * 1.0
+    dat.zF = Umap(zF, dt, dat.Hij)
+    dat.zB = Umap(zB, dt, dat.Hij)
     return dat
 
 
+def propagateGamma(dat):
+    #---- Propagate Ugamma ----------
+    E, U = np.linalg.eigh(dat.Hij)
+    # Transform eigenvalues
+    Udt = U @  np.diag( np.exp( -1j * E * dat.param.dtN) ) @ U.T  
+    dat.Ugam = Udt @ dat.Ugam 
+    return dat
 
 def pop(dat):
     NStates = dat.param.NStates
@@ -204,10 +169,10 @@ def runTraj(parameters):
         dat.R, dat.P = parameters.initR()
 
         # set propagator
-        vv  = VelVer
- 
-        # Call function to initialize mapping variables
- 
+        dat.force = Force
+        dat.Uqm = Uqm
+        vv  = parameters.vv
+  
         # various 
         dat.zF, dat.zB  = initMapping(NStates, F, B) 
 
@@ -227,29 +192,5 @@ def runTraj(parameters):
                 iskip += 1
             #-------------------------------------------------------
             dat = vv(dat)
-
+            dat = propagateGamma(dat)
     return rho_ensemble
-
-if __name__ == "__main__": 
-    import spinBoson as model
-    par =  model.parameters
-    
-    par.dHel = model.dHel
-    par.dHel0 = model.dHel0
-    par.initR = model.initR
-    par.Hel   = model.Hel
-
-    rho_ensemble = runTraj(par)
-    
-    NSteps = model.parameters.NSteps
-    NTraj = model.parameters.NTraj
-    NStates = model.parameters.NStates
-
-    PiiFile = open("Pii.txt","w") 
-    for t in range(NSteps):
-        PiiFile.write(f"{t * model.parameters.nskip} \t")
-        for i in range(NStates):
-            PiiFile.write(str(rho_ensemble[i,i,t].real / NTraj) + "\t")
-        PiiFile.write("\n")
-    PiiFile.close()
-

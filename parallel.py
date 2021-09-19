@@ -6,6 +6,7 @@ import sys, os
 
 sys.path.append(os.popen("pwd").read().replace("\n","")+"/Method")
 sys.path.append(os.popen("pwd").read().replace("\n","")+"/Model")
+from vv import velocityVerlet
 #-------------------------
 try:
     input = open(sys.argv[1], 'r').readlines()
@@ -63,6 +64,9 @@ with Pool(procs) as p:
         par = model.parameters() 
         par.ID   = j
         par.SEED   = np.random.randint(0,100000000)
+        
+        #---- Propagator ------------
+        par.vv  = velocityVerlet
         
         #---- methods in model ------
 

@@ -1,6 +1,5 @@
 import numpy as np
 import sys, os
-
 import random
 
 class Bunch:
@@ -9,7 +8,6 @@ class Bunch:
 
 # Initialization of the mapping Variables
 def initMapping(Nstates, initState = 0, stype = "focused"):
-    #global qF, qB, pF, pB, qF0, qB0, pF0, pB0
     qF = np.zeros((Nstates))
     qB = np.zeros((Nstates))
     pF = np.zeros((Nstates))
@@ -26,32 +24,31 @@ def initMapping(Nstates, initState = 0, stype = "focused"):
        pB = np.array([ np.random.normal() for i in range(Nstates)]) 
     return qF, qB, pF, pB 
 
-def Umap(qF, qB, pF, pB, dt, VMat):
-    qFin, qBin, pFin, pBin = qF * 1.0, qB * 1.0, pF * 1.0, pB * 1.0 # Store input position and momentum for verlet propogation
+def Uqm(dat, dt):
+    qFin, qBin, pFin, pBin = dat.qF * 1.0, dat.qB * 1.0, dat.pF * 1.0, dat.pB * 1.0 # Store input position and momentum for verlet propogation
     # Store initial array containing sums to use at second derivative step
-
-    VMatxqB =  VMat @ qBin #np.array([np.sum(VMat[k,:] * qBin[:]) for k in range(NStates)])
-    VMatxqF =  VMat @ qFin #np.array([np.sum(VMat[k,:] * qFin[:]) for k in range(NStates)])
+    qF, qB, pF, pB  = dat.qF, dat.qB, dat.pF, dat.pB
+    VMatxqB =  dat.Hij @ qBin #np.array([np.sum(VMat[k,:] * qBin[:]) for k in range(NStates)])
+    VMatxqF =  dat.Hij @ qFin #np.array([np.sum(VMat[k,:] * qFin[:]) for k in range(NStates)])
 
     # Update momenta using input positions (first-order in dt)
     pB -= 0.5 * dt * VMatxqB  # VMat @ qBin  
     pF -= 0.5 * dt * VMatxqF  # VMat @ qFin  
     # Now update positions with input momenta (first-order in dt)
-    qB += dt * VMat @ pBin  
-    qF += dt * VMat @ pFin  
+    qB += dt * dat.Hij @ pBin  
+    qF += dt * dat.Hij @ pFin  
     # Update positions to second order in dt
-    qB -=  (dt**2/2.0) * VMat @ VMatxqB 
-    qF -=  (dt**2/2.0) * VMat @ VMatxqF
+    qB -=  (dt**2/2.0) * dat.Hij @ VMatxqB 
+    qF -=  (dt**2/2.0) * dat.Hij @ VMatxqF
        #-----------------------------------------------------------------------------
     # Update momenta using output positions (first-order in dt)
-    pB -= 0.5 * dt * VMat @ qB  
-    pF -= 0.5 * dt * VMat @ qF  
-
-    return qF, qB, pF, pB
+    pB -= 0.5 * dt * dat.Hij @ qB  
+    pF -= 0.5 * dt * dat.Hij @ qF  
+    dat.qF, dat.qB, dat.pF, dat.pB  = qF, qB, pF, pB 
+    return dat
 
 def Force(dat):
-
-    dH = dat.dHij #dHel(R) # Nxnxn Matrix, N = Nuclear DOF, n = NStates 
+    dH = dat.dHij #dHel(R) | Nxnxn Matrix, N = Nuclear DOF, n = NStates 
     dH0 = dat.dH0
     qF, pF, qB, pB =  dat.qF, dat.pF, dat.qB, dat.pB
     # F = np.zeros((len(dat.R)))
@@ -61,44 +58,6 @@ def Force(dat):
         for j in range(i+1, len(qF)):
             F -= 0.5 * dH[i,j,:] * ( qF[i] * qF[j] + pF[i] * pF[j] + qB[i] * qB[j] + pB[i] * pB[j])
     return F
-
-def VelVer(dat) : # R, P, qF, qB, pF, pB, dtI, dtE, F1, Hij,M=1): # Ionic position, ionic velocity, etc.
- 
-    # data 
-    qF, qB, pF, pB = dat.qF * 1.0, dat.qB *  1.0, dat.pF * 1.0, dat.pB * 1.0
-    par =  dat.param
-    v = dat.P/par.M
-    EStep = int(par.dtN/par.dtE)
-    dtE = par.dtN/EStep
-    
-    # half-step mapping
-    for t in range(int(np.floor(EStep/2))):
-        qF, qB, pF, pB = Umap(qF, qB, pF, pB, dtE, dat.Hij)
-    dat.qF, dat.qB, dat.pF, dat.pB = qF * 1, qB * 1, pF * 1, pB * 1 
-
-    # ======= Nuclear Block ==================================
-    F1    =  Force(dat) # force with {qF(t+dt/2)} * dH(R(t))
-    dat.R += v * par.dtN + 0.5 * F1 * par.dtN ** 2 / par.M
-    
-    #------ Do QM ----------------
-    dat.Hij  = par.Hel(dat.R)
-    dat.dHij = par.dHel(dat.R)
-    dat.dH0  = par.dHel0(dat.R)
-    #-----------------------------
-    F2 = Force(dat) # force with {qF(t+dt/2)} * dH(R(t+ dt))
-    v += 0.5 * (F1 + F2) * par.dtN / par.M
-
-    dat.P = v * par.M
-    # =======================================================
-    
-    # half-step mapping
-    dat.Hij = par.Hel(dat.R) # do QM
-    for t in range(int(np.ceil(EStep/2))):
-        qF, qB, pF, pB = Umap(qF, qB, pF, pB, dtE, dat.Hij)
-    dat.qF, dat.qB, dat.pF, dat.pB = qF, qB, pF, pB 
-    
-    return dat
-
 
 
 def pop(dat):
@@ -131,7 +90,9 @@ def runTraj(parameters):
         dat.R, dat.P = parameters.initR()
 
         # set propagator
-        vv  = VelVer
+        dat.force = Force
+        dat.Uqm = Uqm
+        vv  = parameters.vv
 
         # Call function to initialize mapping variables
         dat.qF, dat.qB, dat.pF, dat.pB = initMapping(NStates, initState, stype) 
@@ -155,27 +116,4 @@ def runTraj(parameters):
             dat = vv(dat)
 
     return rho_ensemble
-
-if __name__ == "__main__": 
-    import spinBoson as model
-    par =  model.parameters
-    
-    par.dHel = model.dHel
-    par.dHel0 = model.dHel0
-    par.initR = model.initR
-    par.Hel   = model.Hel
-
-    rho_ensemble = runTraj(par)
-    
-    NSteps = model.parameters.NSteps
-    NTraj = model.parameters.NTraj
-    NStates = model.parameters.NStates
-
-    PiiFile = open("Pii.txt","w") 
-    for t in range(NSteps):
-        PiiFile.write(f"{t * model.parameters.nskip} \t")
-        for i in range(NStates):
-            PiiFile.write(str(rho_ensemble[i,i,t].real / NTraj) + "\t")
-        PiiFile.write("\n")
-    PiiFile.close()
 

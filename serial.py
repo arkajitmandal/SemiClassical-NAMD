@@ -5,6 +5,7 @@
 import sys, os
 sys.path.append(os.popen("pwd").read().replace("\n","")+"/Method")
 sys.path.append(os.popen("pwd").read().replace("\n","")+"/Model")
+from vv import velocityVerlet
 #-------------------------
 try:
     input = open(sys.argv[1], 'r').readlines()
@@ -57,7 +58,9 @@ NStates = model.parameters.NStates
 par = model.parameters() 
 par.ID     = np.random.randint(0,100)
 par.SEED   = np.random.randint(0,100000000)
-    
+
+#---- Propagator ------------
+par.vv  = velocityVerlet
 #---- methods in model ------
 par.dHel = model.dHel
 par.dHel0 = model.dHel0
