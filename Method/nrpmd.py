@@ -74,3 +74,10 @@ def ringPolymer(R,param):
         E+= 0.5 * M * Ω**2 * (R[k] - R[k+1])**2
     return E
 #==========================================================
+
+#=============initializing nuclear momentum================        
+def initP(param):
+    nb, ndof = param.nb , param.ndof
+    sigp = (param.M * param.nb/param.beta)**0.5
+    return np.random.normal(size = (ndof, nb )) * sigp
+#==========================================================
