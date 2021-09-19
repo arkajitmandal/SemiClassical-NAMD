@@ -107,3 +107,101 @@ def Force(R,q,p,dHij,dH0):
         F[i] -= np.sum(rhoij * dHij[:,:,i])
     return F
 #======================================================
+#============ normal mode transformation==============
+def nm_t(P,R,param):
+
+    """
+    normal mode transformation = fourier transform from bead
+    representation to mode representation
+
+    see Eq(36) and (37) at J. Chem. Phys. 154, 124124 (2021)
+    """  
+
+    nb = param.nb
+    ndof = param.ndof
+    lb_n = param.lb_n
+    ub_n = param.ub_n
+    
+    cmat = np.zeros((nb,nb))    # normal mode transformation matrix
+    pibyn = math.acos(-1.0)/nb
+
+
+    P_norm = np.zeros((ndof,nb)) #normal modes for momenta
+    Q_norm = np.zeros((ndof,nb)) #normal modes for position
+
+    for j in range(nb):
+        for i in range(nb):
+            l=(i-int(nb/2))
+            if l==0:
+                cmat[j,l] = 1.0
+            elif l >= lb_n and l<0:
+                cmat[j,l] = np.sqrt(2.0)*np.sin(2.0*pibyn*(j+1)*l)
+            elif l > 0 and l <= ub_n:
+                cmat[j,l] = np.sqrt(2.0)*np.cos(2.0*pibyn*(j+1)*l)
+
+
+
+    pnew = np.zeros((ndof,nb))
+    qnew = np.zeros((ndof,nb))
+
+    for j in range(nb):
+        for i in range(nb):
+            l=(i-int(nb/2))
+            for m in range(ndof):
+                pnew[m,l]+= P[m,j]*cmat[j,l]
+                qnew[m,l]+= R[m,j]*cmat[j,l]
+
+
+    P_norm = pnew/nb
+    Q_norm = qnew/nb
+
+    return P_norm, Q_norm
+#==========================================================
+
+#========== back normal mode transformation================
+def back_nm_t(P_norm,Q_norm,param):
+
+    """
+    back normal mode transformation = fourier transform from mode
+    representation to bead representation
+
+    see Eq(36) and (37) at J. Chem. Phys. 154, 124124 (2021)
+    """  
+
+    nb = param.nb
+    ndof = param.ndof
+    lb_n = param.lb_n
+    ub_n = param.ub_n
+
+    cmat = np.zeros((nb,nb)) # transformation matrices
+    pibyn = math.acos(-1.0)/nb
+
+    P = np.zeros((ndof,nb)) # bead representation momenta
+    R = np.zeros((ndof,nb)) # bead representation position
+
+
+    for j in range(nb):
+        for i in range(nb):
+            l=(i-int(nb/2))
+            if l==0:
+                cmat[j,l] = 1.0
+            elif l >= lb_n and l<0:
+                cmat[j,l] = np.sqrt(2.0)*np.sin(2.0*pibyn*(j+1)*l)
+            elif l > 0 and l <= ub_n:
+                cmat[j,l] = np.sqrt(2.0)*np.cos(2.0*pibyn*(j+1)*l)
+
+    pnew = np.zeros((ndof,nb))
+    qnew = np.zeros((ndof,nb))    
+
+    for j in range(nb):
+        for i in range(nb):
+            l=(i-int(nb/2))
+            for m in range(ndof):
+                pnew[m,j]+= P_norm[m,l]*cmat[j,l]
+                qnew[m,j]+= Q_norm[m,l]*cmat[j,l]
+
+    P = pnew
+    R = qnew
+
+    return P,R
+#==================================================================
