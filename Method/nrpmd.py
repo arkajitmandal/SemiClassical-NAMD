@@ -283,3 +283,26 @@ def freerp(P,R,param):
 
     return P,R
 #=======================================================================
+#========== velocity-verlet for mapping oscillators (each bead)========
+def vvMap(p,q,Hij,dtE):
+    """
+    Hel => function
+    q[nstate, nb]
+    dqi/dt = dH/dpi   =  ∑_i Hij pj | dq/dt =  Hij @ p
+    dpi/dt = - dH/dqi = -∑_i Hij qj | dp/dt = -Hij @ q  
+    ℒ => ℒp dt/2 . ℒq dt . ℒp dt/2
+    """
+    # propagate p half step (dt/2)
+    # p(t+dt) = p(t) + dp/dt * dt 
+    p += (-Hij @ q ) * dtE/2
+
+    # propagate q half step
+    # q(t+dt) = q(t) + qp/dt * dt 
+    q += (Hij @ p) * dtE 
+
+    # propagate p half step (dt/2)
+    # p(t+dt) = p(t) + dp/dt * dt 
+    p += (-Hij @ q ) * dtE/2
+
+    return p,q
+#=======================================================================
