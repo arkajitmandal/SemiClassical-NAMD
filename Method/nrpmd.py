@@ -371,3 +371,36 @@ def pop(p,q,param):
         
     return rho/nb
 #=====================================================================
+
+def runTraj(parameters):
+    #------- Seed --------------------
+    try:
+        np.random.seed(parameters.SEED)
+    except:
+        pass
+    #------------------------------------
+    ## Parameters -------------
+    NSteps = parameters.NSteps
+    NTraj = parameters.NTraj
+    NStates = parameters.NStates
+    initState = parameters.initState # intial state
+    stype = parameters.stype
+    nskip = parameters.nskip
+    #----------ring-polymer parameters-----------------
+    nb = parameters.nb
+    lb_n = -(nb-1)/2    #lowest bead index, useful for normal mode transformation
+    ub_n = (nb-1)/2     # highest bead index, useful for normal mode transformation
+    
+    #==========================
+    if NSteps%nskip == 0:
+        pl = 0
+    else :
+        pl = 1
+    rho_ensemble = np.zeros((NStates,NStates,NSteps//nskip + pl), dtype=complex)
+
+    for itraj in range(NTraj):
+
+        R = monte_carlo(param) # initialize R
+        P = initP(param)  # initialize P
+        p,q = initMap(param) # initialize p,q
+
