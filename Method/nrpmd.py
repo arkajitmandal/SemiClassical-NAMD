@@ -119,8 +119,10 @@ def nm_t(P,R,param):
 
     nb = param.nb
     ndof = param.ndof
-    lb_n = param.lb_n
-    ub_n = param.ub_n
+        
+    lb_n = -(nb-1)/2 
+    ub_n = (nb-1)/2 
+
     
     cmat = np.zeros((nb,nb))    # normal mode transformation matrix
     pibyn = math.acos(-1.0)/nb
@@ -170,8 +172,9 @@ def back_nm_t(P_norm,Q_norm,param):
 
     nb = param.nb
     ndof = param.ndof
-    lb_n = param.lb_n
-    ub_n = param.ub_n
+    
+    lb_n = -(nb-1)/2 
+    ub_n = (nb-1)/2 
 
     cmat = np.zeros((nb,nb)) # transformation matrices
     pibyn = math.acos(-1.0)/nb
@@ -308,7 +311,7 @@ def vvMap(p,q,Hij,dtE):
 #=======================================================================
 
 #============ nonadiabatic velocity-verlet algorithm====================
-def vvna(P,R,p,q,param):
+def vvna(dat):
 
     """
     Velocity Verlet Nonadiabatic
@@ -318,20 +321,24 @@ def vvna(P,R,p,q,param):
     see Eq.(16) of Ceriotti, Parinello JCP 2010 
 
     """
+    p,q = dat.p*1,dat.q*1
+    P,R = dat.P*1,dat*R*1
+    param = dat.param
     Hel = param.Hel
     dHel = param.dHel
     dHel0 = param.dHel0
     nb = param.nb 
     M = param.M
-    dtN,dtE = param.dtN,param.dtE
-    EStep = param.EStep
+    dtN= param.dtN
+    EStep = int(param.dtN/param.dtE)
+    dtE = par.dtN/EStep
 
 
-    #---(ℒpx.dt)---------------
+    #---(ℒpx.dt/2)---------------
     for ib in range(nb):
         Hij = Hel(R[:,ib])
         # propagate electronic degrees
-        for _ in range(EStep):
+        for _ in range(int(np.floor(EStep/2))):
             p[:,ib], q[:,ib] = vvMap(p[:,ib], q[:,ib], Hij, dtE)
 
     
@@ -356,8 +363,17 @@ def vvna(P,R,p,q,param):
         F = Force(R[:,ib], q[:,ib], p[:,ib], dHij, dH0)
         # propagate half-step velocity
         P[:,ib] += F * dtN/2 
+
+    #---(ℒpx.dt/2)---------------
+    for ib in range(nb):
+        Hij = Hel(R[:,ib])
+        # propagate electronic degrees
+        for _ in range(int(np.ceil(EStep/2))):
+            p[:,ib], q[:,ib] = vvMap(p[:,ib], q[:,ib], Hij, dtE)
  
-    return P,R,p,q
+    dat.P,dat.R,dat.p,dat.q = P*1,R*1,p*1,q*1
+
+    return dat
 #====================================================================
 #============ polulation estimator (reduced density matrix)=========
 def pop(p,q,param):
@@ -384,23 +400,53 @@ def runTraj(parameters):
     NTraj = parameters.NTraj
     NStates = parameters.NStates
     initState = parameters.initState # intial state
-    stype = parameters.stype
+    nb = int(parameters.stype) # nb has to be odd
+  
     nskip = parameters.nskip
     #----------ring-polymer parameters-----------------
-    nb = parameters.nb
-    lb_n = -(nb-1)/2    #lowest bead index, useful for normal mode transformation
-    ub_n = (nb-1)/2     # highest bead index, useful for normal mode transformation
+
+    if nb%2!=0:
+        nb = nb+1
+        print(f"Note: using odd number of beads, {nb}")
     
-    #==========================
+    #===================================================
     if NSteps%nskip == 0:
         pl = 0
     else :
         pl = 1
     rho_ensemble = np.zeros((NStates,NStates,NSteps//nskip + pl), dtype=complex)
+   
+    parameters.nb = nb
 
     for itraj in range(NTraj):
 
-        R = monte_carlo(param) # initialize R
-        P = initP(param)  # initialize P
-        p,q = initMap(param) # initialize p,q
+        R = monte_carlo(parameters) # initialize R
+        P = initP(parameters)  # initialize P
+        p,q = initMap(parameters) # initialize p,q
+
+
+        parameters.Hel = Hel
+        parameters.dHel = dHel 
+        parameters.dHel0 = dHel0 
+
+        dat = Bunch(param =  parameters)
+        dat.R, dat.P = R,P
+        dat.q, dat.p = q,p
+               
+        # set propagator
+        vv  = vvna
+
+        for isteps in range(NSteps):
+            
+            dat = vvna(dat)
+                        
+            #------- ESTIMATORS-------------------------------------
+            if (i % nskip == 0):
+                rho_ensemble[:,:,iskip] += pop(dat)
+                iskip += 1
+            #-------------------------------------------------------            
+             
+
+
+
 
