@@ -359,3 +359,15 @@ def vvna(P,R,p,q,param):
  
     return P,R,p,q
 #====================================================================
+#============ polulation estimator (reduced density matrix)=========
+def pop(p,q,param):
+    nb = param.nb
+    nstate = param.nstate
+    rho = np.zeros((nstate,nstate))
+    
+    for ib in range(nb):
+        
+        rho += 0.5*(np.outer(q[:,ib],q[:,ib])+np.outer(p[:,ib],p[:,ib])-np.identity(len(p[:,ib])))
+        
+    return rho/nb
+#=====================================================================
