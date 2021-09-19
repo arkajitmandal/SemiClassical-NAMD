@@ -5,13 +5,15 @@ from numpy import diag_indices as Dii
 
 class parameters():
    NSteps = 3000  
-   NTraj = 50
+   NTraj = 1
    dtN = 1
    dtE = dtN/100
    NStates = 3
    M = 20000
    initState = 0
    nskip = 10
+   ndof = 1
+   
 
 def Hel(R):
     D =  A([0.003,  0.004,  0.003])
@@ -74,3 +76,11 @@ def initR():
     P = np.random.normal()*sigP + P0
 
     return np.array([R]), np.array([P])
+
+#------ only required for NRPMD----------
+def initHel0(R):
+    M = parameters.M
+    ω = 5*10**(-3.0)
+    R0 = 2.9 
+    
+    return  np.sum(0.5 *M* ω**2 * (R-R0)**2.0)
