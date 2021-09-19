@@ -41,23 +41,23 @@ def initMapping(Nstates, initState = 0, stype = "square"):
 
     return qF, pF, γ0
 
-def Umap(qF, pF, dt, VMat):
-    qFin, pFin = qF * 1.0, pF * 1.0  # Store input position and momentum for verlet propogation
+def Uqm(dat, dt):
+    qFin, pFin = dat.qF * 1.0, dat.pF * 1.0  # Store input position and momentum for verlet propogation
     # Store initial array containing sums to use at second derivative step
-
-    VMatxqF =  VMat @ qFin #np.array([np.sum(VMat[k,:] * qFin[:]) for k in range(NStates)])
+    qF, pF  = dat.qF * 1.0, dat.pF * 1.0
+    VMatxqF =  dat.Hij @ qFin #np.array([np.sum(VMat[k,:] * qFin[:]) for k in range(NStates)])
 
     # Update momenta using input positions (first-order in dt)
     pF -= 0.5 * dt * VMatxqF  # VMat @ qFin  
     # Now update positions with input momenta (first-order in dt)
-    qF += dt * VMat @ pFin  
+    qF += dt * dat.Hij @ pFin  
     # Update positions to second order in dt
-    qF -=  (dt**2/2.0) * VMat @ VMatxqF
-       #-----------------------------------------------------------------------------
+    qF -=  (dt**2/2.0) * dat.Hij @ VMatxqF
+    #-----------------------------------------------------------------------------
     # Update momenta using output positions (first-order in dt)
-    pF -= 0.5 * dt * VMat @ qF  
-
-    return qF, pF 
+    pF -= 0.5 * dt * dat.Hij @ qF  
+    dat.qF, dat.pF = qF * 1.0, pF * 1.0 
+    return dat
 
 def Force(dat):
     γ0 = dat.γ0
@@ -71,43 +71,6 @@ def Force(dat):
         for j in range(i+1, len(qF)):
             F -= dH[i,j,:] * ( qF[i] * qF[j] + pF[i] * pF[j])
     return F
-
-def VelVer(dat) : # R, P, qF, qB, pF, pB, dtI, dtE, F1, Hij,M=1): # Ionic position, ionic velocity, etc.
- 
-    # data 
-    qF, pF = dat.qF * 1.0, dat.pF * 1.0 
-    par =  dat.param
-    v = dat.P/par.M
-    EStep = int(par.dtN/par.dtE)
-    dtE = par.dtN/EStep
-    # half-step mapping
-    for t in range(int(np.floor(EStep/2))):
-        qF, pF = Umap(qF, pF, dtE, dat.Hij)
-    dat.qF, dat.pF = qF * 1, pF * 1
-
-    # ======= Nuclear Block ==================================
-    F1    =  Force(dat) # force with {qF(t+dt/2)} * dH(R(t))
-    dat.R += v * par.dtN + 0.5 * F1 * par.dtN ** 2 / par.M
-    
-    #------ Do QM ----------------
-    dat.Hij  = par.Hel(dat.R)
-    dat.dHij = par.dHel(dat.R)
-    dat.dH0  = par.dHel0(dat.R)
-    #-----------------------------
-    F2 = Force(dat) # force with {qF(t+dt/2)} * dH(R(t+ dt))
-    v += 0.5 * (F1 + F2) * par.dtN / par.M
-
-    dat.P = v * par.M
-    # =======================================================
-    
-    # half-step mapping
-    dat.Hij = par.Hel(dat.R) # do QM
-    for t in range(int(np.ceil(EStep/2))):
-        qF, pF = Umap(qF, pF, dtE, dat.Hij)
-    dat.qF, dat.pF = qF * 1, pF * 1
-    
-    return dat
-
 
 
 def popSquare(dat):
@@ -169,7 +132,9 @@ def runTraj(parameters):
         dat.R, dat.P = parameters.initR()
 
         # set propagator
-        vv  = VelVer
+        dat.force = Force
+        dat.Uqm = Uqm
+        vv  = parameters.vv
 
         # Call function to initialize mapping variables
         dat.qF, dat.pF, dat.γ0 = initMapping(NStates, initState, stype) 
