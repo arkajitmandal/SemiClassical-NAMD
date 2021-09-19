@@ -306,3 +306,56 @@ def vvMap(p,q,Hij,dtE):
 
     return p,q
 #=======================================================================
+
+#============ nonadiabatic velocity-verlet algorithm====================
+def vvna(P,R,p,q,param):
+
+    """
+    Velocity Verlet Nonadiabatic
+    ℒ => (ℒpx.dt/2) (ℒPR.dt) (ℒpx.dt/2)
+    (ℒPR.dt) =>  (ℒP.dt/2) (ℒR.dt) (ℒP.dt/2)
+
+    see Eq.(16) of Ceriotti, Parinello JCP 2010 
+
+    """
+    Hel = param.Hel
+    dHel = param.dHel
+    dHel0 = param.dHel0
+    nb = param.nb 
+    M = param.M
+    dtN,dtE = param.dtN,param.dtE
+    EStep = param.EStep
+
+
+    #---(ℒpx.dt)---------------
+    for ib in range(nb):
+        Hij = Hel(R[:,ib])
+        # propagate electronic degrees
+        for _ in range(EStep):
+            p[:,ib], q[:,ib] = vvMap(p[:,ib], q[:,ib], Hij, dtE)
+
+    
+    #---(ℒPR.dt)-----------------
+    #-----(ℒP.dt/2)--------------
+    for ib in range(nb):
+        dHij = dHel(R[:,ib])  # state-dependent
+        dH0  = dHel0(R[:,ib]) # state-independent
+        # Obtain Force 
+        F = Force(R[:,ib], q[:,ib], p[:,ib], dHij, dH0)
+        # propagate half-step velocity
+        P[:,ib] += F * dtN/2 
+        
+    # evolution of free ring-polymer
+    P,R = freerp(P,R,param) 
+       
+    #-----(ℒP.dt/2)--------------
+    for ib in range(nb):
+        dHij = dHel(R[:,ib])
+        dH0  = dHel0(R[:,ib])
+        # Obtain Force 
+        F = Force(R[:,ib], q[:,ib], p[:,ib], dHij, dH0)
+        # propagate half-step velocity
+        P[:,ib] += F * dtN/2 
+ 
+    return P,R,p,q
+#====================================================================
