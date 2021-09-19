@@ -31,7 +31,7 @@ def monte_carlo(param, steps = 3000, dR = 0.5):
     R = np.zeros((param.ndof,param.nb))
     ndof, nb = R.shape
     βn = param.beta/nb 
-
+    Hel0 = param.initHel0
     #Monte carlo loop
     for i in range(steps):
         rDof  = np.random.choice(range(ndof))
@@ -81,3 +81,29 @@ def initP(param):
     sigp = (param.M * param.nb/param.beta)**0.5
     return np.random.normal(size = (ndof, nb )) * sigp
 #==========================================================
+
+#========Calculation of non-adiabatic force term=======
+def Force(R,q,p,dHij,dH0):
+    """
+    Nuclear Force
+    dH => grad of H matrix element
+          must NOT include state independent
+          part as well
+    - 0.5 ∑ dHij (qi * qj + pi * pj - dij) 
+    """      
+
+    F = np.zeros((R.shape)) # ndof nbead
+
+    #----- state independent part-----------
+    F[:] = -dH0 
+    
+    #------- state dependent part------------
+    qiqj = np.outer(q,q)
+    pipj = np.outer(p,p)
+    γ = np.identity(len(q))
+    rhoij = 0.5 * ( qiqj + pipj - γ) 
+    #------ total force term--------------- 
+    for i in range(len(F)):
+        F[i] -= np.sum(rhoij * dHij[:,:,i])
+    return F
+#======================================================
