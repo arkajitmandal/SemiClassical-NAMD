@@ -220,8 +220,9 @@ def ring(param):
     dt = param.dtN
     M = param.M
     beta = param.beta
-    lb_n = param.lb_n
-    ub_n = param.ub_n
+    
+    lb_n = -(nb-1)/2 
+    ub_n = (nb-1)/2 
 
     poly = np.zeros((4,nb))
     
@@ -441,7 +442,7 @@ def runTraj(parameters):
 
         for isteps in range(NSteps):
             
-            dat = vvna(dat)
+            dat = vv(dat)
                         
             #------- ESTIMATORS-------------------------------------
             if (i % nskip == 0):
@@ -450,6 +451,6 @@ def runTraj(parameters):
             #-------------------------------------------------------            
              
 
-
+    return rho_ensemble
 
 
