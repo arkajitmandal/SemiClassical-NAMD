@@ -205,3 +205,50 @@ def back_nm_t(P_norm,Q_norm,param):
 
     return P,R
 #==================================================================
+#======== polynomials for free ring-polymer propagation===============
+def ring(param):
+    
+    """
+    see Ceriotti, Parinello JCP 2010 
+    """
+
+    nb = param.nb
+    ndof = param.ndof
+    dt = param.dtN
+    M = param.M
+    beta = param.beta
+    lb_n = param.lb_n
+    ub_n = param.ub_n
+
+    poly = np.zeros((4,nb))
+    
+    #Monodromy matrix for free ring-polymer update
+
+    betan = beta/nb
+    twown = 2.0/(betan)
+    pibyn = math.acos(-1.0)/nb
+
+    for i in range(nb):
+        l=(i-int(nb/2))
+
+        if l==0:
+            poly[0,0] = 1.0
+            poly[1,0] = 0.0
+            poly[2,0] = dt/M
+            poly[3,0] = 1.0
+            
+        elif l >= lb_n and l<0:
+            poly[0,l]=np.cos(twown*np.sin(l*pibyn)*dt)
+            poly[1,l]=-twown*np.sin(l*pibyn)*M*np.sin(twown*np.sin(l*pibyn)*dt)
+            poly[2,l]=np.sin(twown*np.sin(l*pibyn)*dt)/(twown*np.sin(l*pibyn)*M)
+            poly[3,l]=np.cos(twown*np.sin(l*pibyn)*dt)
+            
+        elif l > 0 and l <= ub_n:
+            poly[0,l]=np.cos(twown*np.sin(l*pibyn)*dt)
+            poly[1,l]=-twown*np.sin(l*pibyn)*M*np.sin(twown*np.sin(l*pibyn)*dt)
+            poly[2,l]=np.sin(twown*np.sin(l*pibyn)*dt)/(twown*np.sin(l*pibyn)*M)
+            poly[3,l]=np.cos(twown*np.sin(l*pibyn)*dt)
+
+    return poly
+
+#==============================================================================
