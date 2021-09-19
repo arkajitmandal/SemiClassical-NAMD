@@ -12,6 +12,7 @@ class parameters():
    M = 20000
    initState = 0
    nskip = 10
+   
 
 def Hel(R):
     D =  A([0.003,  0.004,  0.003])

@@ -421,6 +421,13 @@ def runTraj(parameters):
     rho_ensemble = np.zeros((NStates,NStates,NSteps//nskip + pl), dtype=complex)
    
     parameters.nb = nb
+    
+    try:
+        parameters.beta = parameters.β
+    except:
+        parameters.beta = 2000.0
+        print(f'using β = {parameters.beta}a.u. to mimic 0K')
+     
 
     for itraj in range(NTraj):
 
