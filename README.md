@@ -106,8 +106,8 @@ Method               = pldm-focused
    - **sqc-triangle**: The Symmetric Quasi-Classical Approach, with triangle window [4]. Better than sqc-square.   
    - **zpesqc-triangle**: The zero-point energy corrected Symmetric Quasi-Classical Approach [5], with triangle window. As good as spin-PLDM or better.  
    - **zpesqc-square**: The zero-point energy corrected Symmetric Quasi-Classical Approach [5], with square window. Slightly worse than zpesqc-triangle.
-   - **nrpmd** : The non-adiabatic ring polymer molecular dynamics[6,7] framework for accurately captures nuclear quantum effects while predicting efficient short-time and reliable longer time
-   dynamics. Good for electron/charge transfer dynamics.  
+   - **nrpmd-{n}** : The non-adiabatic ring polymer molecular dynamics[6,7] framework for accurately captures nuclear quantum effects while predicting efficient short-time and reliable longer time
+   dynamics. Good for electron/charge transfer dynamics. Here {"n"} represents the number of beads.  
 
 The output file containing population dynamics is 'method-methodOption-modelName.txt', for the above input file it would be: 
 
