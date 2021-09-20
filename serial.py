@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #SBATCH -o output.log
 
 
@@ -67,6 +67,8 @@ par.dHel0 = model.dHel0
 par.initR = model.initR
 par.Hel   = model.Hel
 par.stype = stype
+if method_[0]=="nrpmd":
+    par.initHel0 = model.initHel0
 #------------------- run --------------- 
 rho_sum  = method.runTraj(par)
 #--------------------------------------- 

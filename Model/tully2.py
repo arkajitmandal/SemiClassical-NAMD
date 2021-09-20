@@ -9,6 +9,7 @@ class parameters():
    M = 2000
    initState = 0
    nskip = 10
+   ndof = 1
 
 def Hel(R):
     A = 0.1
