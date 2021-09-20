@@ -9,6 +9,7 @@ class parameters():
    M = 2000
    initState = 0
    nskip = 5
+   ndof = 1
 
 def Hel(R):
     V = np.zeros((2,2))

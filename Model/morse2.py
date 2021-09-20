@@ -12,6 +12,7 @@ class parameters():
    M = 20000
    initState = 0
    nskip = 10
+   ndof  = 1
 
 def Hel(R):
     D =  A([0.020,  0.010,  0.003])
@@ -74,3 +75,11 @@ def initR():
     P = np.random.normal()*sigP + P0
 
     return np.array([R]), np.array([P])
+
+#------ only required for NRPMD----------
+def initHel0(R):
+    M = parameters.M
+    ω = 5*10**(-3.0)
+    R0 = 3.300
+    
+    return  np.sum(0.5 *M* ω**2 * (R-R0)**2.0)
