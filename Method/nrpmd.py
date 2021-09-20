@@ -220,7 +220,7 @@ def ring(param):
     ndof = param.ndof
     dt = param.dtN
     M = param.M
-    beta = param.beta
+    beta = param.betaDyn
     
     lb_n = -(nb-1)/2 
     ub_n = (nb-1)/2 
@@ -428,6 +428,14 @@ def runTraj(parameters):
     except:
         parameters.beta = 2000.0
         print(f'using β = {parameters.beta}a.u. to mimic 0K')
+        parameters.betaDyn = 20.0
+    
+    try:
+        parameters.betaDyn = parameters.βDyn
+    except:
+        parameters.betaDyn = parameters.beta
+
+
      
 
     for itraj in range(NTraj):
