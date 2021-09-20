@@ -77,3 +77,11 @@ def initR():
     P = np.random.normal()*sigP + P0
 
     return np.array([R]), np.array([P])
+
+#------ only required for NRPMD----------
+def initHel0(R):
+    M = parameters.M
+    ω = 5*10**(-3.0)
+    R0 = 2.1
+    
+    return  np.sum(0.5 *M* ω**2 * (R-R0)**2.0)
