@@ -13,6 +13,10 @@ class parameters():
    initState = 0
    nskip = 10
    ndof = 1
+   #------ temperature (β = 1/kT) [only needed for ring-polymer]------
+   β = 1052.59 #beta for sampling (here 300K)
+   βDyn = 35.70 #fictitious beta
+   #------------------------------------------------------------------ls
    
 
 def Hel(R):

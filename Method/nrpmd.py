@@ -377,7 +377,7 @@ def vvna(dat):
 
     return dat
 #====================================================================
-#============ polulation estimator (reduced density matrix)=========
+#============ population estimator (reduced density matrix)=========
 def pop(dat):
     
     param = dat.param
