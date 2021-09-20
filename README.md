@@ -71,6 +71,17 @@ def initR():
     # (NR = number of nuclear degrees of freedom) 
     # See details below
     return R, P
+
+def initHel0(R):
+    #------ This part will be only for NRPMD----------
+    #-------while running condensed phase system------
+    #R : is a 2D array of dimensionality ndof,nb
+         #where, nb is the bead and ndof is the number of dofs
+    #M : mass of the particle
+    #ω = frequency of the particle
+    #R0 = initial positon of the photo-excitation 
+    # see details below
+    return  np.sum(0.5 *M* ω**2 * (R-R0)**2.0)
 ```
 
 You can find several examples of model files inside the "Model" folder. I will explain each parts of this file in more detain in a section below.
@@ -94,7 +105,9 @@ Method               = pldm-focused
    - **sqc-square**: The Symmetric Quasi-Classical Approach, with square window [3]. Better than MFE. Cannot use it for more than several electronic states.  
    - **sqc-triangle**: The Symmetric Quasi-Classical Approach, with triangle window [4]. Better than sqc-square.   
    - **zpesqc-triangle**: The zero-point energy corrected Symmetric Quasi-Classical Approach [5], with triangle window. As good as spin-PLDM or better.  
-   - **zpesqc-square**: The zero-point energy corrected Symmetric Quasi-Classical Approach [5], with square window. Slightly worse than zpesqc-triangle. 
+   - **zpesqc-square**: The zero-point energy corrected Symmetric Quasi-Classical Approach [5], with square window. Slightly worse than zpesqc-triangle.
+   - **nrpmd** : The non-adiabatic ring polymer molecular dynamics[6,7] framework for accurately captures nuclear quantum effects while predicting efficient short-time and reliable longer time
+   dynamics. Good for electron/charge transfer dynamics.  
 
 The output file containing population dynamics is 'method-methodOption-modelName.txt', for the above input file it would be: 
 
@@ -202,7 +215,9 @@ _____________
 [2] Mannouch and Richardson __J. Chem. Phys. 153, 194109 (2020)__\
 [3] Cotton and Miller __J. Chem. Phys. 139, 234112 (2013)__\
 [4] Cotton and Miller __J. Chem. Phys. 145, 144108 (2016)__\
-[5] Cotton and Miller __J. Chem. Phys. 150, 194110 (2019)__
+[5] Cotton and Miller __J. Chem. Phys. 150, 194110 (2019)__\
+[6] S. N. Chowdhury and P.Huo __J. Chem. Phys. 147, 214109 (2017)__\
+[7] S. N. Chowdhury and P.Huo __J. Chem. Phys. 150, 244102 (2019)__
 
 
 

@@ -1,7 +1,7 @@
 Model                = morse1
-Method               = zpesqc-triangle
+Method               = nrpmd-5
 
 System               = slurm
-Nodes                = 4
-Cpus                 = 24
-Partition            = action    
+Nodes                = 20
+Cpus                 = 4
+Partition            = et3    
