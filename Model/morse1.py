@@ -5,7 +5,7 @@ from numpy import diag_indices as Dii
 
 class parameters():
    NSteps = 3000  
-   NTraj = 1
+   NTraj = 10
    dtN = 1
    dtE = dtN/100
    NStates = 3
