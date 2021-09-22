@@ -2,7 +2,7 @@ import numpy as np
 
 class parameters():
    NSteps = 600 #int(2*10**6)
-   NTraj = 50
+   NTraj = 51
    dtN = 2
    dtE = dtN/40
    NStates = 2
