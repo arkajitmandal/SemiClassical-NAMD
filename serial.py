@@ -15,7 +15,10 @@ except:
 
 
 def getInput(input,key):
-    txt = [i for i in input if i.find(key)!=-1][0].split("=")[1].split("#", 1)[0].replace("\n","")
+    try:
+        txt = [i for i in input if i.find(key)!=-1][0].split("=")[1].split("#", 1)[0].replace("\n","")
+    except:
+        txt = ""
     return txt.replace(" ","")
 
 model_ =  getInput(input,"Model")
