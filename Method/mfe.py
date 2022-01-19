@@ -16,9 +16,9 @@ def propagateCi(ci,Vij, dt):
     c = ci * 1.0
     # https://thomasbronzwaer.wordpress.com/2016/10/15/numerical-quantum-mechanics-the-time-dependent-schrodinger-equation-ii/
     ck1 = (-1j) * (Vij @ c)
-    ck2 = (-1j) * (Vij @ c + (dt/2.0) * ck1 )
-    ck3 = (-1j) * (Vij @ c + (dt/2.0) * ck2 )
-    ck4 = (-1j) * (Vij @ c + (dt) * ck3 )
+    ck2 = (-1j) * Vij @ (c + (dt/2.0) * ck1 )
+    ck3 = (-1j) * Vij @ (c + (dt/2.0) * ck2 )
+    ck4 = (-1j) * Vij @ (c + (dt) * ck3 )
     c = c + (dt/6.0) * (ck1 + 2.0 * ck2 + 2.0 * ck3 + ck4)
     return c
 
