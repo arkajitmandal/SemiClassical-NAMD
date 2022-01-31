@@ -87,6 +87,7 @@ elif system == "htcondor":
     cpus   = getInput(input,"Cpus")
     model  = getInput(input,"Model")
     method = getInput(input,"Method")
+    pylocation = getInput(input,"pylocation")
     # read input-------------------
     exec(f"from {model} import parameters")
 
@@ -106,7 +107,13 @@ elif system == "htcondor":
 
         os.system(f"cp ../condor.sh run-{ic}")
         os.system(f"cp ../serial.py run-{ic}")
-        os.system(f"cp ../condor.sub run-{ic}")
+        #os.system(f"cp ../condor.sub run-{ic}")
+
+        condor = open("../condor.sub","r").readlines()
+        condorfile = open(f"run-{ic}/condor.sub","w+")
+        condor[5] = 'pylocation = /home/arkajitmandal/py3.tar.gz\n'  
+        condorfile.writelines(condor)
+        condorfile.close()
         os.system(f"cp ../input.txt run-{ic}")
 
         os.chdir(f"run-{ic}") 

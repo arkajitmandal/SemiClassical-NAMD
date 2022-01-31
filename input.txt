@@ -3,3 +3,4 @@ Method               = mfe
 
 System               = htcondor
 Cpus                 = 10
+pylocation           = /home/arkajitmandal/py3.tar.gz

@@ -9,7 +9,6 @@ pylocation = /home/arkajitmandal/py3.tar.gz
 Arguments = $(pyFile)
 
 transfer_input_files =   $(pyFile), Model, Method, input.txt, $(pylocation)
-#transfer_output_files = Pii.txt
 
 log    = log/job.log
 error  = log/job.err
