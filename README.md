@@ -106,8 +106,8 @@ Method               = pldm-focused
    - **sqc-triangle**: The Symmetric Quasi-Classical Approach, with triangle window [4]. Better than sqc-square.   
    - **zpesqc-triangle**: The zero-point energy corrected Symmetric Quasi-Classical Approach [5], with triangle window. As good as spin-PLDM or better.  
    - **zpesqc-square**: The zero-point energy corrected Symmetric Quasi-Classical Approach [5], with square window. Slightly worse than zpesqc-triangle.
-   - **nrpmd-{n}** : The non-adiabatic ring polymer molecular dynamics[6,7] framework for accurately captures nuclear quantum effects while predicting efficient short-time and reliable longer time
-   dynamics. Good for electron/charge transfer dynamics. Here {"n"} represents the number of beads.  
+   - **nrpmd-n** : The non-adiabatic ring polymer molecular dynamics[6,7] framework for aims to captures nuclear quantum effects while predicting efficient short-time and reliable longer time
+   dynamics. Reasonable results for electron/charge transfer dynamics. Here n represents the number of beads, i.e. nrpmd-5 means each nuclear degrees of freedom is described with 5 ring-polymer beads.  
 
 The output file containing population dynamics is 'method-methodOption-modelName.txt', for the above input file it would be: 
 
@@ -139,6 +139,44 @@ Please dont add lines like "#SBATCH -N 1" or
 The output file containing population dynamics is 'method-methodOption-modelName.txt', for the above input file it would be: 
 
 _pldm-focused-tully2.txt_
+
+### Step 3 (advanced | parallel jobs; htcondor on HTC) 
+Prepare an input file (name it : 'whateverInput.txt') for slurm submission in your computing cluster:
+```
+Model                = morse1
+Method               = mfe
+
+System               = htcondor
+Cpus                 = 10
+pylocation           = /location/to/my_env.tar.gz
+```
+For first two lines described the model and method. 
+
+Last three lines provide additional commands for htcondor submission. Note that for HTC one needs to create a image of a virtual environment. For details refer to : https://support.opensciencegrid.org/support/solutions/articles/12000058785-run-python-scripts-on-osg 
+
+In short, create a virtual environment, install numpy and zip enviroment, like this:
+```
+$ module load python/3.7.0
+$ python3 -m venv my_env
+$ source my_env/bin/activate
+$ pip install numpy
+$ deactivate
+$ tar czf my_env.tar.gz my_env
+```
+
+In last line my_env.tar.gz is created. Write the location of this zip in the last line of the input,
+```
+pylocation           = /location/to/my_env.tar.gz
+```
+After all jobs are done, run the following python script to get the output file. 
+```
+$ python mfe-morse1.txt
+```
+
+The output file containing population dynamics is 'method-methodOption-modelName.txt', for the above input file it would be: 
+
+_pldm-focused-tully2.txt_
+
 
 ### Step 4 
 
