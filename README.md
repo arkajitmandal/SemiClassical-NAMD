@@ -1,5 +1,5 @@
 # Code for Performing Semi-Classical Quantum Dynamics
-The methods that are implimented in this code are : PLDM, spin-PLDM, MFE (Mean-Field Ehrenfest) and SQC. The present code works for slurm based High-Performance Computing Cluster (HPCC), HTcondor based High-Throughput Computing (HTC) as well as on personal computers.  
+The methods that are implimented in this code are : PLDM (Parital Linearized Density Matrix), spin-PLDM, MFE (Mean-Field Ehrenfest), various SQC (Symmetric Quasi-Classical Approach) and N-RPMD (Nonadiabatic Ring-Polymer Molecular Dynamics). The present code works for slurm based High-Performance Computing Cluster (HPCC), HTcondor based High-Throughput Computing (HTC) as well as on personal computers.  
 
 # Usage  
 ### Step 1
@@ -175,7 +175,7 @@ $ python avg.py
 
 The output file containing population dynamics is 'method-methodOption-modelName.txt', for the above input file it would be: 
 
-_pldm-focused-tully2.txt_
+_mfe-morse1.txt_
 
 
 ### Step 4 
