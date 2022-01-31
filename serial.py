@@ -67,6 +67,7 @@ par.dHel0 = model.dHel0
 par.initR = model.initR
 par.Hel   = model.Hel
 par.stype = stype
+
 if method_[0]=="nrpmd":
     par.initHel0 = model.initHel0
 #------------------- run --------------- 
@@ -78,6 +79,7 @@ try:
     PiiFile = open(f"{fold}/{method_[0]}-{method_[1]}-{model_}.txt","w") 
 except:
     PiiFile = open(f"{fold}/{method_[0]}-{model_}.txt","w") 
+
 NTraj = model.parameters().NTraj
 
 if (method_[0] == 'sqc'):
@@ -102,3 +104,4 @@ else:
 t2 = time.time()-t1
 print(f"Total Time: {t2}")
 print(f"Time per trajectory: {t2/ntraj}")
+

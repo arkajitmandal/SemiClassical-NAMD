@@ -1,0 +1,7 @@
+Model                = morse1
+Method               = nrpmd-5
+
+System               = slurm
+Nodes                = 20
+Cpus                 = 4
+Partition            = et3    

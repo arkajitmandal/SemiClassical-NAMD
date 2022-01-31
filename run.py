@@ -33,7 +33,7 @@ print(f"Reading {inputfile}")
 
 # System
 system = getInput(input,"System")
-
+#print (system)
 # SLURM
 if system == "slurm":
     print ("Running jobs in a HPCC")
@@ -80,7 +80,38 @@ if system == "slurm":
     jobs = ":".join(ids)
     pre = f"--dependency=afterok:{jobs} --partition {partition} --output=output.log --open-mode=append"
     sbatch("avg.py", inputfile, pre)
-    
+
+elif system == "htcondor":
+    print ("Running jobs in a HTC")
+    # read input-------------------
+    cpus   = getInput(input,"Cpus")
+    model  = getInput(input,"Model")
+    method = getInput(input,"Method")
+    # read input-------------------
+    exec(f"from {model} import parameters")
+
+    ntraj = parameters.NTraj
+    print(f"Total Number of Trajectories = {int(float(ntraj) * float(cpus))}")
+    os.system(f"rm -rf RUN")
+    os.mkdir("RUN")
+    os.chdir("RUN") 
+    for ic in range(int(cpus)):
+        os.mkdir(f"run-{ic}")
+        os.mkdir(f"run-{ic}/Model")
+        os.mkdir(f"run-{ic}/Method")
+        os.mkdir(f"run-{ic}/log")
+        
+        os.system(f"cp ../Model/{model}.py run-{ic}/Model/")
+        os.system(f"cp ../Method/{method}.py run-{ic}/Method/")
+
+        os.system(f"cp ../condor.sh run-{ic}")
+        os.system(f"cp ../serial.py run-{ic}")
+        os.system(f"cp ../condor.sub run-{ic}")
+        os.system(f"cp ../input.txt run-{ic}")
+
+        os.chdir(f"run-{ic}") 
+        os.system("condor_submit condor.sub") 
+        os.chdir(f"../") 
 # PC
 else:
     print ("Running jobs in your local machine (like a PC)")
