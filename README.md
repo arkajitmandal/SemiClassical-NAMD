@@ -170,7 +170,7 @@ pylocation           = /location/to/my_env.tar.gz
 ```
 After all jobs are done, run the following python script to get the output file. 
 ```
-$ python mfe-morse1.txt
+$ python avg.py
 ```
 
 The output file containing population dynamics is 'method-methodOption-modelName.txt', for the above input file it would be: 
