@@ -106,6 +106,8 @@ Method               = pldm-focused
    - **sqc-triangle**: The Symmetric Quasi-Classical Approach, with triangle window [4]. Better than sqc-square.   
    - **zpesqc-triangle**: The zero-point energy corrected Symmetric Quasi-Classical Approach [5], with triangle window. As good as spin-PLDM or better.  
    - **zpesqc-square**: The zero-point energy corrected Symmetric Quasi-Classical Approach [5], with square window. Slightly worse than zpesqc-triangle.
+   - **spinlsc**: Spin-LSC approach, sort of simpler version of Spin-PLDM. I think this is actually a great method. 
+
    - **nrpmd-n** : The non-adiabatic ring polymer molecular dynamics[6,7] framework for aims to captures nuclear quantum effects while predicting efficient short-time and reliable longer time
    dynamics. Reasonable results for electron/charge transfer dynamics. Here n represents the number of beads, i.e. nrpmd-5 means each nuclear degrees of freedom is described with 5 ring-polymer beads.  
 
