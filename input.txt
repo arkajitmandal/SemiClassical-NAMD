@@ -1,6 +1,6 @@
 Model                = tully2
 Method               = spinlsc
 
-System               = slurm
+System               = pc
 Cpus                 = 10
 

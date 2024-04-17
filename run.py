@@ -47,37 +47,19 @@ if system == "slurm" or system == "htcondor":
         for i in range(ncpus):
             os.system(f"sbatch serial.py {inputfile} {fold} {i}")
     if system == "htcondor":
-        os.system(f"condor_submit condor.sub -queue {ncpus} input={inputfile} output={fold}")
+        os.system(f"condor_submit condor.sub input={inputfile} output={fold} -queue {ncpus}")
 
 # PC
 else:
     print ("Running jobs in your local machine (like a PC)")
     # Some messages 
-    ignoreList = []
-    try :
-        getInput(input,"Nodes")
-        ignoreList.append("Nodes")
-        
-    except:
-        pass
-    try :
-        getInput(input,"Cpus")
-        ignoreList.append("Cpus")
-    except:
-        pass
-    try :
-        getInput(input,"Partition")
-        ignoreList.append("Partition")
-    except:
-        pass
-    print(f"Ignoring {ignoreList} in {inputfile}")
     model = getInput(input,"Model")
     exec(f"from {model} import parameters")
     ntraj = parameters.NTraj 
     print("-"*50)
     print(f"Total Number of Trajectories = {ntraj}")
     print("-"*50)
-    os.system(f"python3 serial.py {inputfile}")
+    os.system(f"python3 serial.py {inputfile} {fold}")
 
 
 
