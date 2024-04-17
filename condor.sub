@@ -21,5 +21,3 @@ output = output/job.out
 request_cpus    = 1 
 request_memory  = 4GB
 request_disk    = 2GB
-
-queue 100
