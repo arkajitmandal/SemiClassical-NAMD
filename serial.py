@@ -1,10 +1,21 @@
-#!/usr/bin/env python3
-#SBATCH -o output.log
+#!/sw/eb/sw/Anaconda3/2024.02-1/bin/python
+
+##NECESSARY JOB SPECIFICATIONS
+#SBATCH --job-name=NAMD         #Set the job name to "JobExample1"
+#SBATCH --time=01:30:00         #Set the wall clock limit to 1hr and 30min
+#SBATCH --ntasks=1               #Request 1 task
+#SBATCH --mem=2560M                   
+#SBATCH --output=output/out.%j            
 
 
 import sys, os
+
+import numpy as np
+
 sys.path.append(os.popen("pwd").read().replace("\n","")+"/Method")
 sys.path.append(os.popen("pwd").read().replace("\n","")+"/Model")
+
+
 #-------------------------
 try:
     input = open(sys.argv[1], 'r').readlines()
@@ -39,9 +50,21 @@ trajs = model.parameters.NTraj
 #----------------
 try:
     fold = sys.argv[2]
+    os.system(f"rm -rf {fold}")
+    os.system(f"mkdir -p {fold}")
     
 except:
-    fold = "."
+    os.system(f"rm -rf {fold}")
+    os.system("mkdir -p output")
+    fold = "./output"
+
+
+ID = ''
+try :
+    ID = sys.argv[3]
+    ID = "-" + ID
+except:
+    pass
 
 #------------------------------------------------------------------------------------------
 procs = 1
@@ -70,15 +93,18 @@ par.stype = stype
 
 if method_[0]=="nrpmd":
     par.initHel0 = model.initHel0
+    
+    
+    
 #------------------- run --------------- 
 rho_sum  = method.runTraj(par)
 #--------------------------------------- 
 
 
 try:    
-    PiiFile = open(f"{fold}/{method_[0]}-{method_[1]}-{model_}.txt","w") 
+    PiiFile = open(f"{fold}/{method_[0]}-{method_[1]}-{model_}{ID}.txt","w") 
 except:
-    PiiFile = open(f"{fold}/{method_[0]}-{model_}.txt","w") 
+    PiiFile = open(f"{fold}/{method_[0]}-{model_}{ID}.txt","w") 
 
 NTraj = model.parameters().NTraj
 
@@ -92,6 +118,7 @@ if (method_[0] == 'sqc'):
             PiiFile.write(str(rho_sum[i,i,t].real / ( norm ) ) + "\t")
         PiiFile.write("\n")
     PiiFile.close()
+    
 else:
     for t in range(rho_sum.shape[-1]):
         PiiFile.write(f"{t * model.parameters.nskip * model.parameters.dtN} \t")

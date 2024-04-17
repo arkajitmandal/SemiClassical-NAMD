@@ -1,26 +1,25 @@
-universe    = vanilla     
++SingularityImage = "/cvmfs/singularity.opensciencegrid.org/opensciencegrid/osgvo-ubuntu-20.04:latest"
 executable  = condor.sh
 
 #---- Python File -------
 pyFile  = serial.py 
-pylocation = /home/arkajitmandal/py3.tar.gz  
+#input   = input.txt
+#output  = output
 #------------------------
 
-Arguments = $(pyFile)
+Arguments = $(pyFile) $(input) $(output) $(ProcID)
 
-transfer_input_files =   $(pyFile), Model, Method, input.txt, $(pylocation)
+transfer_input_files =   $(pyFile), Model, Method, input.txt 
 
-log    = log/job.log
-error  = log/job.err
-output = log/job.out
+# log    = log/job.log
+error  = output/job.err
+output = output/job.out
 
 
 # Require nodes that can access the correct OSG modules
-Requirements = (HAS_MODULES =?= true) && (OSGVO_OS_STRING == "RHEL 7")
 
 request_cpus    = 1 
 request_memory  = 4GB
 request_disk    = 2GB
 
-queue  
-
+queue 100
