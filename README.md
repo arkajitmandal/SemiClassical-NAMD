@@ -150,26 +150,11 @@ Method               = mfe
 
 System               = htcondor
 Cpus                 = 10
-pylocation           = /location/to/my_env.tar.gz
+
 ```
 For first two lines described the model and method. 
 
-Last three lines provide additional commands for htcondor submission. Note that for HTC one needs to create a image of a virtual environment. For details refer to : https://support.opensciencegrid.org/support/solutions/articles/12000058785-run-python-scripts-on-osg 
-
-In short, create a virtual environment, install numpy and zip enviroment, like this:
-```
-$ module load python/3.7.0
-$ python3 -m venv my_env
-$ source my_env/bin/activate
-$ pip install numpy
-$ deactivate
-$ tar czf my_env.tar.gz my_env
-```
-
-In last line my_env.tar.gz is created. Write the location of this zip in the last line of the input,
-```
-pylocation           = /location/to/my_env.tar.gz
-```
+Last line provide just as before indicate the number of cpus to be used.
 After all jobs are done, run the following python script to get the output file. 
 ```
 $ python avg.py
@@ -197,6 +182,8 @@ python3 run.py
 In all of the approaches coded up here, the nuclear DOF __{R,P}__ are evolved classically (their equation motion evolves under a classical like force) and the electronic DOF are described with the diabatic electronic states __{|i⟩}__.  
 
 A molecular Hamiltonian in the diabatic representation is written as:
+
+$$\hat{H} = $$
 
 ![Hm](eqns/Hm.svg)
 
