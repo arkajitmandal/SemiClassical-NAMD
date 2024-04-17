@@ -20,9 +20,11 @@ print(f"Reading {inputfile}")
 fold = 'output'
 try :
     fold = sys.argv[2]
+
 except: 
     pass
-
+os.system(f"rm -rf {fold}")
+os.system(f"mkdir -p {fold}")
 # System
 system = getInput(input,"System")
 #print (system)
