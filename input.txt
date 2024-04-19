@@ -1,6 +1,11 @@
-Model                = tully2
-Method               = spinlsc
+Model                = spinBoson
+Method               = pldm-focused
 
-System               = slurm
+System               = pc
 Cpus                 = 10
 
+# variables that start with $ override the defaults in the model file
+
+$dtN               = 0.01
+$NTraj             = 5
+$NSteps            = 2000 
