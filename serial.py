@@ -130,5 +130,5 @@ else:
 
 t2 = time.time()-t1
 print(f"Total Time: {t2}")
-print(f"Time per trajectory: {t2/ntraj}")
+print(f"Time per trajectory: {t2/NTraj}")
 

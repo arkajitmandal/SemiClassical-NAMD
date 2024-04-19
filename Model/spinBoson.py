@@ -1,6 +1,6 @@
 import numpy as np
 from numpy import array as A
-
+from numba import jit, objmode
 def model(M=3):
 
     #        |  M0 |  M1 |  M2  |  M3 |  M4 |  M5 |
