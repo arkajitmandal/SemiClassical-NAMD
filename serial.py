@@ -18,11 +18,11 @@ sys.path.append(os.popen("pwd").read().replace("\n","")+"/Model")
 
 #-------------------------
 try:
-    input = open(sys.argv[1], 'r').readlines()
+    inputtxt = open(sys.argv[1], 'r').readlines()
     print(f"Reading {sys.argv[1]}")
 except:
     print("Reading input.txt")
-    input = open('input.txt', 'r').readlines()
+    inputtxt = open('input.txt', 'r').readlines()
 
 
 def getInput(input,key):
@@ -32,8 +32,8 @@ def getInput(input,key):
         txt = ""
     return txt.replace(" ","")
 
-model_ =  getInput(input,"Model")
-method_ = getInput(input,"Method").split("-")
+model_ =  getInput(inputtxt,"Model")
+method_ = getInput(inputtxt,"Method").split("-")
 exec(f"import {model_} as model")
 exec(f"import {method_[0]} as method")
 try:
@@ -94,7 +94,15 @@ par.stype = stype
 if method_[0]=="nrpmd":
     par.initHel0 = model.initHel0
     
-    
+
+#---- overriden parameters ------
+
+parameters = [i for i in inputtxt if i.split("#")[0].split("=")[0].find("$") !=- 1]
+for p in parameters:
+    exec(f"par.{p.split('=')[0].split('$')[1]} = {p.split('=')[1].split('#')[0]}")
+    print(f"Overriding parameters: {p.split('=')[0].split('$')[1]} = {p.split('=')[1].split('#')[0]}")
+#--------------------------------
+
     
 #------------------- run --------------- 
 rho_sum  = method.runTraj(par)
@@ -106,7 +114,7 @@ try:
 except:
     PiiFile = open(f"{fold}/{method_[0]}-{model_}{ID}.txt","w") 
 
-NTraj = model.parameters().NTraj
+NTraj = par.NTraj
 
 if (method_[0] == 'sqc'):
     for t in range(rho_sum.shape[-1]):
