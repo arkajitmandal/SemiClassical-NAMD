@@ -1,11 +1,11 @@
 Model                = spinBoson
-Method               = pldm-focused
+Method               = mfe
 
-System               = pc
-Cpus                 = 10
+System               = slurm # slurm/condor/pc
+Cpus                 = 30
 
 # variables that start with $ override the defaults in the model file
 
 $dtN               = 0.01
-$NTraj             = 5
+$NTraj             = 200
 $NSteps            = 2000 

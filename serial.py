@@ -45,9 +45,7 @@ import time
 import numpy as np
 
 t0 = time.time()
-#----------------
-trajs = model.parameters.NTraj
-#----------------
+
 try:
     fold = sys.argv[2]
     os.system(f"rm -rf {fold}")
@@ -66,16 +64,10 @@ try :
 except:
     pass
 
-#------------------------------------------------------------------------------------------
-procs = 1
-ntraj = trajs
-#------------------------------------------------------------------------------------------
-#------------------------------------------------------------------------------------------
-
 t1 = time.time()
 
 
-NSteps = model.parameters.NSteps
+
 NTraj = model.parameters.NTraj
 NStates = model.parameters.NStates
 

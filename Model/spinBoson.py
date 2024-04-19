@@ -15,8 +15,6 @@ def model(M=3):
 
 
 def bathParam(ξ, ωc, ndof):
-    
-
     ωm = 4.0
     ω0 = ωc * ( 1-np.exp(-ωm) ) / ndof
     c = np.zeros(( ndof ))
