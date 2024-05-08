@@ -48,15 +48,11 @@ t0 = time.time()
 
 try:
     fold = sys.argv[2]
-    os.system(f"rm -rf {fold}")
-    os.system(f"mkdir -p {fold}")
-    
 except:
-    os.system(f"rm -rf {fold}")
-    os.system("mkdir -p output")
     fold = "./output"
 
 
+os.system(f"mkdir -p {fold}")
 ID = ''
 try :
     ID = sys.argv[3]
@@ -65,8 +61,6 @@ except:
     pass
 
 t1 = time.time()
-
-
 
 NTraj = model.parameters.NTraj
 NStates = model.parameters.NStates
@@ -95,22 +89,22 @@ for p in parameters:
     print(f"Overriding parameters: {p.split('=')[0].split('$')[1]} = {p.split('=')[1].split('#')[0]}")
 #--------------------------------
 
-    
 #------------------- run --------------- 
 rho_sum  = method.runTraj(par)
 #--------------------------------------- 
 
-
 try:    
-    PiiFile = open(f"{fold}/{method_[0]}-{method_[1]}-{model_}{ID}.txt","w") 
+    PiiFile = open(f"{fold}/{method_[0]}-{method_[1]}-{model_}{ID}.txt","w+") 
 except:
-    PiiFile = open(f"{fold}/{method_[0]}-{model_}{ID}.txt","w") 
+    PiiFile = open(f"{fold}/{method_[0]}-{model_}{ID}.txt","w+") 
 
 NTraj = par.NTraj
 
+#times = np.arange(rho_sum.shape[-1]) * par.nskip * par.dtN, par.nskip * par.dtN
+
 if (method_[0] == 'sqc'):
     for t in range(rho_sum.shape[-1]):
-        PiiFile.write(f"{t * model.parameters.nskip * model.parameters.dtN} \t")
+        PiiFile.write(f"{t * par.nskip * par.dtN} \t")
         norm = 0
         for i in range(NStates):
             norm += rho_sum[i,i,t].real
@@ -121,7 +115,7 @@ if (method_[0] == 'sqc'):
     
 else:
     for t in range(rho_sum.shape[-1]):
-        PiiFile.write(f"{t * model.parameters.nskip * model.parameters.dtN} \t")
+        PiiFile.write(f"{t * par.nskip * par.dtN} \t")
         for i in range(NStates):
             PiiFile.write(str(rho_sum[i,i,t].real / ( NTraj ) ) + "\t")
         PiiFile.write("\n")
@@ -131,4 +125,3 @@ else:
 t2 = time.time()-t1
 print(f"Total Time: {t2}")
 print(f"Time per trajectory: {t2/NTraj}")
-

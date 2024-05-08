@@ -23,11 +23,13 @@ try :
 
 except: 
     pass
-os.system(f"rm -rf {fold}")
-os.system(f"mkdir -p {fold}")
+
 # System
 system = getInput(input,"System")
-#print (system)
+
+os.system(f"rm -rf {fold}")
+os.system(f"mkdir -p {fold}")
+
 # SLURM
 if system == "slurm" or system == "htcondor":
     print (f"Running jobs in a {system}")
@@ -35,21 +37,25 @@ if system == "slurm" or system == "htcondor":
     exec(f"from {model} import parameters")
     ntraj = parameters.NTraj 
 
-
     ncpus     = int(getInput(input,"Cpus"))
     totalTraj = ntraj * ncpus
     print(f"Using {ncpus} CPUs")
-    print("-"*50)
+    print("-"*20, "Default Parameters", "-"*20)
     print(f"Total Number of Trajectories = {totalTraj}")
     print(f"Trajectories per CPU         = {ntraj}")
 
+    print("-"*50)
+    parameters = [i for i in input if i.split("#")[0].split("=")[0].find("$") !=- 1]
+    for p in parameters:
+        print(f"Overriding parameters: {p.split('=')[0].split('$')[1]} = {p.split('=')[1].split('#')[0]}")
     print("-"*50)
     
     if system == "slurm":
         for i in range(ncpus):
             os.system(f"sbatch serial.py {inputfile} {fold} {i}")
     if system == "htcondor":
-        os.system(f"condor_submit condor.sub input={inputfile} output={fold} -queue {ncpus}")
+        
+        os.system(f"condor_submit condor.sub input={inputfile} outFold={fold} -queue {ncpus}")
 
 # PC
 else:
@@ -62,6 +68,3 @@ else:
     print(f"Total Number of Trajectories = {ntraj}")
     print("-"*50)
     os.system(f"python3 serial.py {inputfile} {fold}")
-
-
-

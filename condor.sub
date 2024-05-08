@@ -7,13 +7,16 @@ pyFile  = serial.py
 #output  = output
 #------------------------
 
-Arguments = $(pyFile) $(input) $(output) $(ProcID)
+Arguments = $(pyFile) $(input) $(outFold) $(ProcID)
 
 transfer_input_files =   $(pyFile), Model, Method, input.txt 
+transfer_output_files =  $(outFold)
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
 
-# log    = log/job.log
-error  = output/job.err
-output = output/job.out
+# log    = $(outFold)/job.log
+error  = $(outFold)/job.err
+output = $(outFold)/job.out
 
 
 # Require nodes that can access the correct OSG modules

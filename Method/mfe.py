@@ -1,7 +1,7 @@
 import numpy as np
 # jit
 import time
-from numba import jit, objmode
+# from numba import jit, objmode
 
 class Bunch:
     def __init__(self, **kwds):
@@ -14,7 +14,7 @@ def initElectronic(Nstates, initState = 0):
     c[initState] = 1.0
     return c
 
-@jit(nopython=False)
+#@jit(nopython=False)
 def propagateCi(ci,Vij, dt):
     c = ci * 1.0
     # https://thomasbronzwaer.wordpress.com/2016/10/15/numerical-quantum-mechanics-the-time-dependent-schrodinger-equation-ii/
@@ -25,7 +25,7 @@ def propagateCi(ci,Vij, dt):
     c = c + (dt/6.0) * (ck1 + 2.0 * ck2 + 2.0 * ck3 + ck4)
     return c
 
-@jit(nopython=False)
+#@jit(nopython=False)
 def Force(dHij, dH0, ci):
 
     # dH = dat.dHij #dHel(R) # Nxnxn Matrix, N = Nuclear DOF, n = NStates 
