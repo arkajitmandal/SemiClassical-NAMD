@@ -1,7 +1,7 @@
 # From https://pubs.aip.org/aip/jcp/article/159/9/094115/2909882/A-multi-state-mapping-approach-to-surface-hopping
 
 import numpy as np
-# jit
+import copy
 import time
  
 
@@ -47,7 +47,9 @@ def Force(dHij, dH0, acst, U):
     F -= np.einsum('i, ijk, j -> k', U[:, acst].conjugate(), dHij + 0j, U[:,acst]).real
     return F
 
-def VelVer(dat, acst, dt) : 
+def VelVer(ogdat, acst, dt) : 
+
+    dat = copy.deepcopy(ogdat)
     par =  dat.param
     v = dat.P/par.M
     F1 = dat.F1 * 1.0
@@ -105,14 +107,18 @@ def hop(dat, a, b):
         Ψa = dat.U[:,a]
         Ψb = dat.U[:,b]
         
+        
         dij = np.einsum('j,jkl->kl',np.conj(Ψa).T,dat.dHij)
         dij = -np.einsum('kl,k->l', dij, Ψb)/(dat.E[b]-dat.E[a])
         δk = dij * 4 *(np.conj(dat.ci[a])*dat.ci[b]).real  
         
+        
         #Project the momentum to the new direction
         P_proj = np.dot(P,δk) * δk / np.dot(δk, δk) 
+        #print('np.dot(δk, δk) ',np.dot(δk, δk) )
         #Compute the orthogonal momentum
         P_orth = P - P_proj # orthogonal P
+
 
         #Compute projected norm, which will be useful later
         P_proj_norm = np.sqrt(np.dot(P_proj,P_proj))
@@ -187,11 +193,10 @@ def runTraj(parameters):
             #-------------------------------------------------------
             dat0 = vv(dat, acst, dtN)
             
-            maxhop = 2
+            maxhop = 10
             
-            #if(checkHop(acst, dat0.ci)[0]==True):
-            if (hop(dat0, acst, checkHop(acst, dat0.ci)[2])[1]): 
-                #print("hop")
+            if(checkHop(acst, dat0.ci)[0]==True):
+            #if (hop(dat0, acst, checkHop(acst, dat0.ci)[2])[1]): 
                 newacst = checkHop(acst, dat0.ci)[2]
                 # lets find the bisecting point
                 tL, tR = 0, dtN
@@ -220,5 +225,4 @@ def runTraj(parameters):
 
 
     return rho_ensemble
-
 
