@@ -1,6 +1,5 @@
 import numpy as np
 from numpy import array as A
-
 def model(M=3):
 
     #        |  M0 |  M1 |  M2  |  M3 |  M4 |  M5 |
@@ -15,8 +14,6 @@ def model(M=3):
 
 
 def bathParam(ξ, ωc, ndof):
-    
-
     ωm = 4.0
     ω0 = ωc * ( 1-np.exp(-ωm) ) / ndof
     c = np.zeros(( ndof ))

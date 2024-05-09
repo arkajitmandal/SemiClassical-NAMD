@@ -1,5 +1,7 @@
 import numpy as np
-
+# jit
+import time
+# from numba import jit, objmode
 
 class Bunch:
     def __init__(self, **kwds):
@@ -12,6 +14,7 @@ def initElectronic(Nstates, initState = 0):
     c[initState] = 1.0
     return c
 
+#@jit(nopython=False)
 def propagateCi(ci,Vij, dt):
     c = ci * 1.0
     # https://thomasbronzwaer.wordpress.com/2016/10/15/numerical-quantum-mechanics-the-time-dependent-schrodinger-equation-ii/
@@ -22,18 +25,21 @@ def propagateCi(ci,Vij, dt):
     c = c + (dt/6.0) * (ck1 + 2.0 * ck2 + 2.0 * ck3 + ck4)
     return c
 
-def Force(dat):
+#@jit(nopython=False)
+def Force(dHij, dH0, ci):
 
-    dH = dat.dHij #dHel(R) # Nxnxn Matrix, N = Nuclear DOF, n = NStates 
-    dH0  = dat.dH0 
-
-    ci = dat.ci
+    # dH = dat.dHij #dHel(R) # Nxnxn Matrix, N = Nuclear DOF, n = NStates 
+    # dH0  = dat.dH0 
+    # ci = dat.ci
 
     F = -dH0 #np.zeros((len(dat.R)))
+    #F -= np.real(np.einsum('ijk,i,j->k', dHij, ci.conjugate(), ci))
+
     for i in range(len(ci)):
-        F -= dH[i,i,:]  * (ci[i] * ci[i].conjugate() ).real
+        F -= dHij[i,i,:]  * (ci[i] * ci[i].conjugate() ).real
         for j in range(i+1, len(ci)):
-            F -= 2.0 * dH[i,j,:]  * (ci[i].conjugate() * ci[j] ).real
+            F -= 2.0 * dHij[i,j,:]  * (ci[i].conjugate() * ci[j] ).real
+
     return F
 
 def VelVer(dat) : 
@@ -56,11 +62,11 @@ def VelVer(dat) :
     dat.R += v * par.dtN + 0.5 * F1 * par.dtN ** 2 / par.M
     
     #------ Do QM ----------------
-    dat.Hij  = par.Hel(dat.R)
+    dat.Hij  = par.Hel(dat.R) + 0j
     dat.dHij = par.dHel(dat.R)
     dat.dH0  = par.dHel0(dat.R)
     #-----------------------------
-    F2 = Force(dat) # force at t2
+    F2 = Force(dat.dHij, dat.dH0, dat.ci) # force at t2
     v += 0.5 * (F1 + F2) * par.dtN / par.M
     dat.F1 = F2
     dat.P = v * par.M
@@ -110,12 +116,13 @@ def runTraj(parameters):
         dat.ci = initElectronic(NStates, initState) # np.array([0,1])
 
         #----- Initial QM --------
-        dat.Hij  = parameters.Hel(dat.R)
+        dat.Hij  = parameters.Hel(dat.R) + 0j
         dat.dHij = parameters.dHel(dat.R)
         dat.dH0  = parameters.dHel0(dat.R)
-        dat.F1 = Force(dat) # Initial Force
+        dat.F1 = Force(dat.dHij, dat.dH0, dat.ci) # Initial Force
         #----------------------------
         iskip = 0 # please modify
+        t0 = time.time()
         for i in range(NSteps): # One trajectory
             #------- ESTIMATORS-------------------------------------
             if (i % nskip == 0):
@@ -123,24 +130,10 @@ def runTraj(parameters):
                 iskip += 1
             #-------------------------------------------------------
             dat = vv(dat)
+        time_taken = time.time()-t0
+        print(f"Time taken: {time_taken} seconds")
+
 
     return rho_ensemble
 
-if __name__ == "__main__": 
-    import spinBoson as model
-    par =  model.parameters
-    
-    rho_ensemble = runTraj(par)
-    
-    NSteps = model.parameters.NSteps
-    NTraj = model.parameters.NTraj
-    NStates = model.parameters.NStates
-
-    PiiFile = open("Pii.txt","w") 
-    for t in range(NSteps):
-        PiiFile.write(f"{t * model.parameters.nskip} \t")
-        for i in range(NStates):
-            PiiFile.write(str(rho_ensemble[i,i,t].real / NTraj) + "\t")
-        PiiFile.write("\n")
-    PiiFile.close()
 

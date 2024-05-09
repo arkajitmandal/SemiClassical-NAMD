@@ -156,26 +156,3 @@ def runTraj(parameters):
 
     return rho_ensemble
 
-if __name__ == "__main__": 
-    import spinBoson as model
-    par =  model.parameters
-    
-    par.dHel = model.dHel
-    par.dHel0 = model.dHel0
-    par.initR = model.initR
-    par.Hel   = model.Hel
-
-    rho_ensemble = runTraj(par)
-    
-    NSteps = model.parameters.NSteps
-    NTraj = model.parameters.NTraj
-    NStates = model.parameters.NStates
-
-    PiiFile = open("Pii.txt","w") 
-    for t in range(NSteps):
-        PiiFile.write(f"{t * model.parameters.nskip} \t")
-        for i in range(NStates):
-            PiiFile.write(str(rho_ensemble[i,i,t].real / NTraj) + "\t")
-        PiiFile.write("\n")
-    PiiFile.close()
-

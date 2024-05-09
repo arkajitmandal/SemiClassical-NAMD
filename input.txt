@@ -1,2 +1,11 @@
-Model                = tully2
-Method               = spinlsc
+Model                = spinBoson
+Method               = mfe
+
+System               = pc  # slurm/htcondor/pc
+Cpus                 = 30
+
+# variables that start with $ override the defaults in the model file
+
+$dtN               = 0.01
+$NTraj             = 200
+$NSteps            = 2000 
