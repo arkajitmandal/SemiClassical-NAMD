@@ -201,7 +201,7 @@ where the definition of $\Lambda_{ij}$ depends on the quantum dynamics method. F
 **_NOTE:_** You **dont** need to code up  $V_{0}(\{R_k\})$. 
 
 ### Hel(R)
-In the Hel(R) function inside the 'modelName.py' one have to define NxN matrix elements of the state-dependent electronic part of the Hamiltonian. Here you will code up  $ V_{ij}(\{R_k\})$.
+In the Hel(R) function inside the 'modelName.py' one have to define NxN matrix elements of the state-dependent electronic part of the Hamiltonian. Here you will code up  $V_{ij}(\{R_k\})$.
 
 ### dHel(R)
 In the dHel(R) function inside the 'modelName.py' one have to define NxNxNR matrix elements of the state-dependent gradient electronic part of the Hamiltonian. Here you will code up  $\nabla_k V_{ij}(\{R_k\})$.
