@@ -107,18 +107,35 @@ def hop(dat, a, b):
         Ψa = dat.U[:,a]
         Ψb = dat.U[:,b]
         
+        # -----------------------------------------------------------------------------------------
+        # Sharon-Tully Approach
+        # dij = np.einsum('j,jkl->kl',np.conj(Ψa).T,dat.dHij)
+        # dij = -np.einsum('kl,k->l', dij, Ψb)/(dat.E[b]-dat.E[a])
+        # δk = dij * 4 *(np.conj(dat.ci[a])*dat.ci[b]).real  
+        # -----------------------------------------------------------------------------------------
         
-        dij = np.einsum('j,jkl->kl',np.conj(Ψa).T,dat.dHij)
-        dij = -np.einsum('kl,k->l', dij, Ψb)/(dat.E[b]-dat.E[a])
-        δk = dij * 4 *(np.conj(dat.ci[a])*dat.ci[b]).real  
         
+        # # direction -> 1/√m ∑f Re (c[f] d [f,a] c[a] - c[f] d [f,b] c[b])  # c[f] = ∑m <m | Ψf> 
+        # #            =Re ( 1/√m ∑f ∑nm Ψ[m ,f]^ . (<m | dH/dRk | n> ) . Ψ[n ,a] /(E[a]-E[f])
+        j = np.arange(len(dat.E))
+        ΔEa, ΔEb = (dat.E[a] - dat.E), (dat.E[b] - dat.E)
+        ΔEa[a], ΔEb[b] = 1.0, 1.0 # just to ignore error message
+        rΔEa, rΔEb = (a != j)/ΔEa, (b != j)/ΔEb
+   
+        #v2
+        fma = np.einsum('mf, f -> m', dat.U.conjugate(), rΔEa)
+        fmb = np.einsum('mf, f -> m', dat.U.conjugate(), rΔEb)
         
+        term1 = np.einsum('m, mnk, n -> k', fma, dat.dHij, Ψa)
+        term2 = np.einsum('m, mnk, n -> k', fmb, dat.dHij, Ψb)
+        
+        δk = (term1 - term2).real * 1/np.sqrt(dat.param.M) 
+
         #Project the momentum to the new direction
         P_proj = np.dot(P,δk) * δk / np.dot(δk, δk) 
         #print('np.dot(δk, δk) ',np.dot(δk, δk) )
         #Compute the orthogonal momentum
         P_orth = P - P_proj # orthogonal P
-
 
         #Compute projected norm, which will be useful later
         P_proj_norm = np.sqrt(np.dot(P_proj,P_proj))
@@ -195,8 +212,8 @@ def runTraj(parameters):
             
             maxhop = 10
             
-            if(checkHop(acst, dat0.ci)[0]==True):
-            #if (hop(dat0, acst, checkHop(acst, dat0.ci)[2])[1]): 
+            #if(checkHop(acst, dat0.ci)[0]==True):
+            if (hop(dat0, acst, checkHop(acst, dat0.ci)[2])[1]): 
                 newacst = checkHop(acst, dat0.ci)[2]
                 # lets find the bisecting point
                 tL, tR = 0, dtN
