@@ -108,8 +108,10 @@ Method               = pldm-focused
    - **zpesqc-square**: The zero-point energy corrected Symmetric Quasi-Classical Approach [5], with square window. Slightly worse than zpesqc-triangle.
    - **spinlsc**: Spin-LSC approach, sort of simpler version of Spin-PLDM. I think this is actually a great method. 
 
-   - **nrpmd-n** : The non-adiabatic ring polymer molecular dynamics[6,7] framework for aims to captures nuclear quantum effects while predicting efficient short-time and reliable longer time
+   - **nrpmd-n** : The non-adiabatic ring polymer molecular dynamics[6] framework for aims to captures nuclear quantum effects while predicting efficient short-time and reliable longer time
    dynamics. Reasonable results for electron/charge transfer dynamics. Here n represents the number of beads, i.e. nrpmd-5 means each nuclear degrees of freedom is described with 5 ring-polymer beads.  
+
+   - **mash** : Multistate Mapping Approach to Surface Hopping approach. [7] 
 
 The output file containing population dynamics is 'method-methodOption-modelName.txt', for the above input file it would be: 
 
@@ -128,7 +130,7 @@ Partition            = action
 ```
 For first two lines see previous section. 
 
-Last four lines provide additional commands for slurm submission. For adding additional slurm ('#SBATCH') command, add them in the preamble of the 'parallel.py'. The default preamble looks like:
+Last four lines provide additional commands for slurm submission. For adding additional slurm ('#SBATCH') command, add them in the preamble of the 'serial.py'. The default preamble looks like:
 ```py
 #!/usr/bin/env python
 #SBATCH -o output.log
@@ -179,54 +181,41 @@ python3 run.py
 ```
 
 # Details of Model Hamiltonian
-In all of the approaches coded up here, the nuclear DOF __{R,P}__ are evolved classically (their equation motion evolves under a classical like force) and the electronic DOF are described with the diabatic electronic states __{|i⟩}__.  
+In all of the approaches coded up here, the nuclear DOF $\{R_k, P_k\}$ are evolved classically (their equation motion evolves under a classical like force) and the electronic DOF are described with the diabatic electronic states $\{|i\rangle\}$.  
 
 A molecular Hamiltonian in the diabatic representation is written as:
 
-$$\hat{H} = $$
-
-![Hm](eqns/Hm.svg)
-
-where __P<sub>k</sub>__ is the momentum for the __k__ th nuclear degrees of freedom with mass __M<sub>k</sub>__. Further, __V<sub>0</sub>(\{R<sub>k</sub>})__  and  __V<sub>ij</sub>(\{R<sub>k</sub>})__ are the state-independent and state-dependent part of the electronic Hamiltonian __H<sub>el</sub>(\{R<sub>k</sub>})__ in the diabatic basis __{|i⟩}__. That is:  __⟨i| Ĥ - ∑<sub>k</sub> P<sup>2</sup><sub>k</sub>/2M<sub>k</sub> |j⟩ = V<sub>ij</sub>({R<sub>k</sub>}) + V<sub>0</sub>(\{R<sub>k</sub>})δ<sub>ij</sub>__. Of course most of times, we wave our hands, and make up models that describe __V<sub>ij</sub>({R<sub>k</sub>})__ with some analytical functions of __{R<sub>k</sub>}__. If you know the analytical form of __V<sub>ij</sub>({R<sub>k</sub>})__ you can write a model file: modelName.py. 
+$$\hat{H} = \frac{P_k^2}{2M_k} + V_{0}(\{R_k\}) + \sum_{ij}V_{ij}(\{R_k\})|i \rangle \langle j| = \sum_{k} T_{R_k} + \hat{H}_{el}(\{R_k\})$$
 
 
-One can always, set __V<sub>0</sub>(\{R<sub>k</sub>})__ = 0, and instead redefine __V<sub>ij</sub>(\{R<sub>k</sub>}) ⟶ V<sub>ij</sub>(\{R<sub>k</sub>}) + V<sub>0</sub>(\{R<sub>k</sub>})δ<sub>ij</sub>__ and they should be equivalent in principle. However, some of the semiclassical approaches (**pldm-sampled**, **sqc-square** and **sqc-triangle**) produce results that depend on how one separates the state-independent and state-dependent parts of the gradient of the electronic Hamiltonian. This is because, this separation provides state dependent and independent gradients : __∇<sub>k</sub>V<sub>0</sub>(\{R<sub>k</sub>})__  and __∇<sub>k</sub>V<sub>ij</sub>(\{R<sub>k</sub>})__ which will provide different forces on nuclear particle for different choices of separations in some of these approximate quantum dynamics approaches. The nuclear forces computed in all of these approaches assumes this general form:
+where $P_k$ is the momentum for the $k$ th nuclear degrees of freedom with mass $M_k$. Further, $V_{0}(\{R_k\})$ and  $V_{ij}(\{R_k\})$ are the state-independent and state-dependent part of the electronic Hamiltonian $\hat{H}_{el}(\{R_k\})$ in the diabatic basis $\{|i\rangle\}$. That is: $\langle i | \hat{H}_{el}(\{R_k\}) |j \rangle =  V_{0}(\{R_k\})\delta_{ij} + V_{ij}(\{R_k\})$. Write the analytical form of $V_{ij}(\{R_k\})$ you can write a model file: **modelName.py**. 
 
-![Hm](eqns/Force.svg)
 
-where Λ<sub>ij</sub> vaguely resembles the electornic density matrix elements. For example, in MFE, Λ<sub>ij</sub> = c<sub>i</sub>*c<sub>j</sub>.  For methods that have ∑<sub>i</sub>Λ<sub>ii</sub> = 1 (like MFE) for individual trajectories this separation of state-dependent and independent does not matter. For other's as I said before, it does. In my experience, the more you can put in the independent part the better. 
+One can always, set $V_{0}(\{R_k\})= 0$, and instead redefine $ V_{ij}(\{R_k\}) \rightarrow V_{0}(\{R_k\})\delta_{ij} + V_{ij}(\{R_k\})$ and they should be equivalent in principle. However, some of the semiclassical approaches (**pldm-sampled**, **sqc-square** and **sqc-triangle**) produce results that depend on how one separates the state-independent and state-dependent parts of the gradient of the electronic Hamiltonian. The nuclear forces computed in all of these approaches assumes this general form:
 
-When such separation is not aparent, one can separate state-independent and state-dependent parts in the following manner. Consider the following molecular Hamiltonian with no aparent state-independent part of the electronic Hamiltonian:
+$F_k = - \nabla_k V_{0}(\{R_k\}) - \sum_{ij}  \nabla_k V_{ij}(\{R_k\}) \cdot \Lambda_{ij}$
 
-![Hm](eqns/Hm2.svg)
-
-One can define a state-independent part as:
-
-![Hm](eqns/Hm3.svg)
-
-and consequently the new state-dependent part  (with matrix elements __V'<sub>ij</sub>(\{R<sub>k</sub>})__ ) becomes:
-
-![Hm](eqns/Hm4.svg)
-
-With this choice one gets the following state dependent and independent part of gradients: __∇<sub>k</sub>V<sub>0</sub>(\{R<sub>k</sub>})__  and __∇<sub>k</sub>V'<sub>ij</sub>(\{R<sub>k</sub>})__.
-
+where the definition of $\Lambda_{ij}$ depends on the quantum dynamics method. For example, in MFE, $\Lambda_{ij} = c_i^* c_j$.  For methods that have ∑<sub>i</sub>Λ<sub>ii</sub> = 1 (like MFE) for individual trajectories this separation of state-dependent and independent does not matter. 
 
 ## Details of a model file ('modelName.py')
+**_NOTE:_** You **dont** need to code up  $V_{0}(\{R_k\})$. 
 
 ### Hel(R)
-In the Hel(R) function inside the 'modelName.py' one have to define NxN matrix elements of the state-dependent electronic part of the Hamiltonian. Here you will code up  __V<sub>ij</sub>(\{R<sub>k</sub>})__.
+In the Hel(R) function inside the 'modelName.py' one have to define NxN matrix elements of the state-dependent electronic part of the Hamiltonian. Here you will code up  $ V_{ij}(\{R_k\})$.
 
 ### dHel(R)
-In the dHel(R) function inside the 'modelName.py' one have to define NxNxNR matrix elements of the state-dependent gradient electronic part of the Hamiltonian. Here you will code up  __∇<sub>k</sub>V<sub>ij</sub>(\{R<sub>k</sub>})__.
+In the dHel(R) function inside the 'modelName.py' one have to define NxNxNR matrix elements of the state-dependent gradient electronic part of the Hamiltonian. Here you will code up  $\nabla_k V_{ij}(\{R_k\})$.
 
 ### dHel0(R)
-In the dHel0(R) function inside the 'modelName.py' one have to define a array of length NR describing the state-independent gradient of electronic part of the Hamiltonian. Here you will code up  __∇<sub>k</sub>V<sub>0</sub>(\{R<sub>k</sub>})__.
+In the dHel0(R) function inside the 'modelName.py' one have to define a array of length NR describing the state-independent gradient of electronic part of the Hamiltonian. Here you will code up  $\nabla_k V_{0}(\{R_k\})$.
 
-
-**_NOTE:_** You dont need to code up __V<sub>0</sub>(\{R<sub>k</sub>})__ as such a zero-point energy shift does not affect dynamics. 
 
 ### initR()
-Sample R, P from a wigner distribution. 
+Sample R, P from a Wigner distribution. To obtain the wigner distribution, one needs to start with an initial density matrix. For example, for an wavefunction $|\chi \rangle$ write the density matrix $\hat{\rho}_N = |\chi  \rangle \langle \chi|$, then the Wigner transform is performed as,
+
+$\hat{\rho}_N^{W}({R, P}) = \frac{1}{\pi\hbar} \int_{-\infty}^{\infty} \langle {R} - \frac{S}{2}|\hat{\rho}_N |{R} + \frac{S}{2} \rangle e^{iPS} dS $.
+
+The R, P is then sampled from $\hat{\rho}_N^{W}({R, P})$.
 
 _____________
 _to be continued_...
@@ -236,6 +225,17 @@ For example consider a 1D dimentional model system, called the Tully's Model II.
 
 [6] Braden, Mandal and Huo __J. Chem. Phys. 155, 084106__
 -->
+## Authors
+* Arkajit Mandal
+* Braden Weight
+* Sutirtha Chowdhury
+* Eric Koessler
+* Elious M. Mondal
+* Haimi Nguyen
+* Muhammad R. Hasyim
+* Wenxiang Ying
+* James F. Varner
+
 ## References
 _____________
 [1] Huo and Coker __J. Chem. Phys. 135, 201101 (2011)__\
@@ -244,8 +244,7 @@ _____________
 [4] Cotton and Miller __J. Chem. Phys. 145, 144108 (2016)__\
 [5] Cotton and Miller __J. Chem. Phys. 150, 194110 (2019)__\
 [6] S. N. Chowdhury and P.Huo __J. Chem. Phys. 147, 214109 (2017)__\
-[7] S. N. Chowdhury and P.Huo __J. Chem. Phys. 150, 244102 (2019)__
-
+[7] J. E. Runeson and D. E. Manolopoulos __J. Chem. Phys. 150, 244102 (2019)__ 
 
 
 email: arkajitmandal@gmail.com
