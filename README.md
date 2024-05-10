@@ -213,7 +213,7 @@ In the dHel0(R) function inside the 'modelName.py' one have to define a array of
 ### initR()
 Sample R, P from a Wigner distribution. To obtain the wigner distribution, one needs to start with an initial density matrix. For example, for an wavefunction $|\chi \rangle$ write the density matrix $\hat{\rho}_N = |\chi  \rangle \langle \chi|$, then the Wigner transform is performed as,
 
-$\hat{\rho}_N^{W}({R, P}) = \frac{1}{\pi\hbar} \int_{-\infty}^{\infty} \langle {R} - \frac{S}{2}|\hat{\rho}_N |{R} + \frac{S}{2} \rangle e^{iPS} dS $.
+$\hat{\rho}_N^{W}({R, P}) = \frac{1}{\pi\hbar} \int_{-\infty}^{\infty} \langle {R} - \frac{S}{2}|\hat{\rho}_N |{R} + \frac{S}{2} \rangle e^{iPS} dS$ .
 
 The R, P is then sampled from $\hat{\rho}_N^{W}({R, P})$.
 
