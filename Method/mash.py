@@ -106,28 +106,32 @@ def hop(dat, a, b):
         
         Ψa = dat.U[:,a]
         Ψb = dat.U[:,b]
+        ci = dat.ci * 1.0
         
-        # -----------------------------------------------------------------------------------------
-        # Sharon-Tully Approach
-        # dij = np.einsum('j,jkl->kl',np.conj(Ψa).T,dat.dHij)
-        # dij = -np.einsum('kl,k->l', dij, Ψb)/(dat.E[b]-dat.E[a])
-        # δk = dij * 4 *(np.conj(dat.ci[a])*dat.ci[b]).real  
-        # -----------------------------------------------------------------------------------------
-        
-        
-        # # direction -> 1/√m ∑f Re (c[f] d [f,a] c[a] - c[f] d [f,b] c[b])  # c[f] = ∑m <m | Ψf> 
-        # #            =Re ( 1/√m ∑f ∑nm Ψ[m ,f]^ . (<m | dH/dRk | n> ) . Ψ[n ,a] /(E[a]-E[f])
+        #--------------------------------------------------------
         j = np.arange(len(dat.E))
         ΔEa, ΔEb = (dat.E[a] - dat.E), (dat.E[b] - dat.E)
         ΔEa[a], ΔEb[b] = 1.0, 1.0 # just to ignore error message
         rΔEa, rΔEb = (a != j)/ΔEa, (b != j)/ΔEb
-   
-        #v2
-        fma = np.einsum('mf, f -> m', dat.U.conjugate(), rΔEa)
-        fmb = np.einsum('mf, f -> m', dat.U.conjugate(), rΔEb)
+        #--------------------------------------------------------
         
-        term1 = np.einsum('m, mnk, n -> k', fma, dat.dHij, Ψa)
-        term2 = np.einsum('m, mnk, n -> k', fmb, dat.dHij, Ψb)
+        # # direction -> 1/√m ∑f Re (c[f] d [f,a] c[a] - c[f] d [f,b] c[b])  # c[f] = ∑m <m | Ψf> 
+        
+        ## Term 1
+        ## ∑n < Ψ | n > < n| dH | a > < a | Ψ > / (E[a] - E[n])
+        
+        dHab =   np.einsum('ia, ijk, jb -> abk', dat.U.conjugate(), dat.dHij, dat.U)
+        term1 = np.einsum('n, nj, n -> j', ci.conjugate(),  dHab[:, a, :] * ci[a], rΔEa)
+        term2 = np.einsum('n, nj, n -> j', ci.conjugate(),  dHab[:, b, :] * ci[b], rΔEb)
+        
+        
+        # #            =Re ( 1/√m ∑f ∑nm Ψ[m ,f]^ . (<m | dH/dRk | n> ) . Ψ[n ,a] /(E[a]-E[f])
+        # #v2
+        # fma = np.einsum('mf, f -> m', dat.U.conjugate(), rΔEa)
+        # fmb = np.einsum('mf, f -> m', dat.U.conjugate(), rΔEb)
+        
+        # term1 = np.einsum('m, mnk, n -> k', fma, dat.dHij, Ψa)
+        # term2 = np.einsum('m, mnk, n -> k', fmb, dat.dHij, Ψb)
         
         δk = (term1 - term2).real * 1/np.sqrt(dat.param.M) 
 
