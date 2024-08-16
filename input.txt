@@ -8,4 +8,3 @@ Cpus                 = 30
 
 $dtN               = 0.01
 $NTraj             = 500
-$NSteps            = 2000 
