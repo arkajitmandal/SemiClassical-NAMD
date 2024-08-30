@@ -224,7 +224,7 @@ def runTraj(parameters):
                 for _ in range(maxhop):
                     tm = (tL + tR)/2
                     dat_tm = vv(dat, acst, tm)
-                    if checkHop(acst, dat_tm.ci)[0]:
+                    if checkHop(acst, dat_tm.ci)[0] == False:
                         tL = tm
                     else:
                         tR = tm
