@@ -190,10 +190,8 @@ $$\hat{H} = \frac{P_k^2}{2M_k} + V_{0}(\{R_k\}) + \sum_{ij}V_{ij}(\{R_k\})|i \ra
 
 where $P_k$ is the momentum for the $k$ th nuclear degrees of freedom with mass $M_k$. Further, $V_{0}(\{R_k\})$ and  $V_{ij}(\{R_k\})$ are the state-independent and state-dependent part of the electronic Hamiltonian in the diabatic basis {$|i \rangle$}. That is: 
 
-$\langle i| \hat{H}_{el} (\{R_k\}) |j\rangle =  V_{0}(\{R_k\})\delta_{ij} + V_{ij}(\{R_k\})$
+$$ \langle i| \hat{H}_{el} (R_k) |j\rangle = V_0 (R_k) \delta\_{ij} + V\_{ij}(\{R_k\})$$
 
-
-$\langle i| \hat{H}_{el}(\{R_k\}) |j\rangle$  $=  V_{0}(\{R_k\})\delta_{ij} + V_{ij}(\{R_k\})$. 
 
 Write the analytical form of $V_{ij}(\{R_k\})$ you can write a model file: **modelName.py**. 
 
