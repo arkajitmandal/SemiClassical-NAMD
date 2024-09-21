@@ -193,26 +193,26 @@ where $P_k$ is the momentum for the $k$ th nuclear degrees of freedom with mass 
 $$ \langle i| \hat{H}_{el} (\\{R_k\\}) |j\rangle = V_0 (\\{R_k\\}) \delta\_{ij} + V\_{ij}(\\{R_k\\})$$
 
 
-Write the analytical form of $V_{ij}(\{R_k\})$ you can write a model file: **modelName.py**. 
+Write the analytical form of $V_{ij}(\\{R_k\\})$ you can write a model file: **modelName.py**. 
 
 
-One can always, set $V_{0}(\{R_k\})= 0$, and instead redefine $V_{ij}(\{R_k\}) \rightarrow V_{0}(\\{R_k\\})\delta_{ij} + V_{ij}(\\{R_k\\})$ and they should be equivalent in principle. However, some of the semiclassical approaches (**pldm-sampled**, **sqc-square** and **sqc-triangle**) produce results that depend on how one separates the state-independent and state-dependent parts of the gradient of the electronic Hamiltonian. The nuclear forces computed in all of these approaches assumes this general form:
+One can always, set $V_{0}(\\{R_k\\})= 0$, and instead redefine $V_{ij}(\{R_k\}) \rightarrow V_{0}(\\{R_k\\})\delta_{ij} + V_{ij}(\\{R_k\\})$ and they should be equivalent in principle. However, some of the semiclassical approaches (**pldm-sampled**, **sqc-square** and **sqc-triangle**) produce results that depend on how one separates the state-independent and state-dependent parts of the gradient of the electronic Hamiltonian. The nuclear forces computed in all of these approaches assumes this general form:
 
 $F_k = - \nabla_k V_{0}(\\{R_k\\}) - \sum_{ij}  \nabla_k V_{ij}(\\{R_k\\}) \cdot \Lambda_{ij}$
 
 where the definition of $\Lambda_{ij}$ depends on the quantum dynamics method. For example, in MFE, $\Lambda_{ij} = c_i^* c_j$.  For methods that have ∑<sub>i</sub>Λ<sub>ii</sub> = 1 (like MFE) for individual trajectories this separation of state-dependent and independent does not matter. 
 
 ## Details of a model file ('modelName.py')
-**_NOTE:_** You **dont** need to code up  $V_{0}(\{R_k\})$. 
+**_NOTE:_** You **dont** need to code up  $V_{0}(\\{R_k\\})$. 
 
 ### Hel(R)
-In the Hel(R) function inside the 'modelName.py' one have to define NxN matrix elements of the state-dependent electronic part of the Hamiltonian. Here you will code up  $V_{ij}(\{R_k\})$.
+In the Hel(R) function inside the 'modelName.py' one have to define NxN matrix elements of the state-dependent electronic part of the Hamiltonian. Here you will code up  $V_{ij}(\\{R_k\\})$.
 
 ### dHel(R)
-In the dHel(R) function inside the 'modelName.py' one have to define NxNxNR matrix elements of the state-dependent gradient electronic part of the Hamiltonian. Here you will code up  $\nabla_k V_{ij}(\{R_k\})$.
+In the dHel(R) function inside the 'modelName.py' one have to define NxNxNR matrix elements of the state-dependent gradient electronic part of the Hamiltonian. Here you will code up  $\nabla_k V_{ij}(\\{R_k\\})$.
 
 ### dHel0(R)
-In the dHel0(R) function inside the 'modelName.py' one have to define a array of length NR describing the state-independent gradient of electronic part of the Hamiltonian. Here you will code up  $\nabla_k V_{0}(\{R_k\})$.
+In the dHel0(R) function inside the 'modelName.py' one have to define a array of length NR describing the state-independent gradient of electronic part of the Hamiltonian. Here you will code up  $\nabla_k V_{0}(\\{R_k\\})$.
 
 
 ### initR()
