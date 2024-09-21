@@ -181,24 +181,24 @@ python3 run.py
 ```
 
 # Details of Model Hamiltonian
-In all of the approaches coded up here, the nuclear DOF $\{R_k, P_k\}$ are evolved classically (their equation motion evolves under a classical like force) and the electronic DOF are described with the diabatic electronic states $\{|i\rangle\}$.  
+In all of the approaches coded up here, the nuclear DOF $\{R_k, P_k\}$ are evolved classically (their equation motion evolves under a classical like force) and the electronic DOF are described with the diabatic electronic states { $|i\rangle$ }.  
 
 A molecular Hamiltonian in the diabatic representation is written as:
 
-$$\hat{H} = \frac{P_k^2}{2M_k} + V_{0}(\{R_k\}) + \sum_{ij}V_{ij}(\{R_k\})|i \rangle \langle j| = \sum_{k} T_{R_k} + \hat{H}_{el}(\{R_k\})$$
+$$\hat{H} = \frac{P_k^2}{2M_k} + V_{0}(  \\{   R_k \\}  ) + \sum_{ij}V_{ij}(\\{R_k\\})|i \rangle \langle j| = \sum_{k} T_{R_k} + \hat{H}_{el}(\\{R_k\\})$$
 
 
-where $P_k$ is the momentum for the $k$ th nuclear degrees of freedom with mass $M_k$. Further, $V_{0}(\{R_k\})$ and  $V_{ij}(\{R_k\})$ are the state-independent and state-dependent part of the electronic Hamiltonian in the diabatic basis {$|i \rangle$}. That is: 
+where $P_k$ is the momentum for the $k$ th nuclear degrees of freedom with mass $M_k$. Further, $V_{0}(\\{R_k\\})$ and  $V_{ij}(\\{R_k\\})$ are the state-independent and state-dependent part of the electronic Hamiltonian in the diabatic basis { $|i \rangle$ }. That is: 
 
-$$ \langle i| \hat{H}_{el} (R_k) |j\rangle = V_0 (R_k) \delta\_{ij} + V\_{ij}(\{R_k\})$$
+$$ \langle i| \hat{H}_{el} (\\{R_k\\}) |j\rangle = V_0 (\\{R_k\\}) \delta\_{ij} + V\_{ij}(\\{R_k\\})$$
 
 
 Write the analytical form of $V_{ij}(\{R_k\})$ you can write a model file: **modelName.py**. 
 
 
-One can always, set $V_{0}(\{R_k\})= 0$, and instead redefine $V_{ij}(\{R_k\}) \rightarrow V_{0}(\{R_k\})\delta_{ij} + V_{ij}(\{R_k\})$ and they should be equivalent in principle. However, some of the semiclassical approaches (**pldm-sampled**, **sqc-square** and **sqc-triangle**) produce results that depend on how one separates the state-independent and state-dependent parts of the gradient of the electronic Hamiltonian. The nuclear forces computed in all of these approaches assumes this general form:
+One can always, set $V_{0}(\{R_k\})= 0$, and instead redefine $V_{ij}(\{R_k\}) \rightarrow V_{0}(\\{R_k\\})\delta_{ij} + V_{ij}(\\{R_k\\})$ and they should be equivalent in principle. However, some of the semiclassical approaches (**pldm-sampled**, **sqc-square** and **sqc-triangle**) produce results that depend on how one separates the state-independent and state-dependent parts of the gradient of the electronic Hamiltonian. The nuclear forces computed in all of these approaches assumes this general form:
 
-$F_k = - \nabla_k V_{0}(\{R_k\}) - \sum_{ij}  \nabla_k V_{ij}(\{R_k\}) \cdot \Lambda_{ij}$
+$F_k = - \nabla_k V_{0}(\\{R_k\\}) - \sum_{ij}  \nabla_k V_{ij}(\\{R_k\\}) \cdot \Lambda_{ij}$
 
 where the definition of $\Lambda_{ij}$ depends on the quantum dynamics method. For example, in MFE, $\Lambda_{ij} = c_i^* c_j$.  For methods that have ∑<sub>i</sub>Λ<sub>ii</sub> = 1 (like MFE) for individual trajectories this separation of state-dependent and independent does not matter. 
 
